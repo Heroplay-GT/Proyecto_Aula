@@ -3,77 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="../Css/style.css "
+    <title>ParkinGO</title>
+    <link rel="stylesheet" href="../CSS/style.css">
 </head>
 <body>
     
+    <header>
+        <h2 class="logo">ParkinGO</h2>
+        <nav class="navigation">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Services</a>
+                <a href="#">Contact</a>
+                <button class="btnLogin-popup">Login</button>
+        </nav>
+    </header>
+
+    <!--Formulario Login-->
     <div class="wrapper">
-        <span class="bg-animate"></span>
-        <span class="bg-animate2"></span>
-        
+        <span class="icon-close">
+            <ion-icon name="close"></ion-icon>
+        </span>
         <div class="form-box login">
-
-            <h2 class="animation" style="--i:0; --j:21;">Login</h2>
+            <h2>Login</h2>
             <form action="../Controller/login.php" method="POST">
-
-                <div class="input-box animation" style="--i:1; --j:22;">
-                    <input type="text" required name="username">
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="person"></ion-icon></span>
+                    <input type="text" required>
                     <label>Username</label>
-                    <i class='bx bxs-user'></i>
                 </div>
-                <div class="input-box animation" style="--i:2; --j:23;">
-                    <input type="password" required name="password">
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" required>
                     <label>Password</label>
-                    <i class='bx bxs-lock-alt'></i>
                 </div>
-                <button type="submit" class="btn animation" style="--i:3; --j:24;">Login</button>
-                <div class="logreg-link animation" style="--i:4; --j:25;">
-                    <p>Don't have an account? <a href="#" class="register-link">Sign Up</a></p>
+                <div class="remember-forgot">
+                    <label><input type="checkbox"> Remember me</label>
+                    <a href="#">Forgot password?</a>
+                </div>
+                <button type="submit" class="btn">Login</button>
+                <div class="login-register">
+                    <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
                 </div>
             </form>
+        </div>
 
-        </div>
-        <div class="info-text login">
-            <h2 class="animation" style="--i:0; --j:20;">Welcome Back!</h2>
-            <p class="animation" style="--i:1; --j:21;">Lorem ipsum dolor sit, amet consectetur adipisicing</p>
-        </div>
+        <!--Formulario registro-->
         <div class="form-box register">
-
-            <h2 class="animation" style="--i:17; --j:0;" >Sign Up</h2>
-            <form action="../Controller/registro.php" method="POST">
-
-                <div class="input-box animation" style="--i:18; --j:1;">
-                    <input type="text" required name="username">
+            <h2>Registration</h2>
+            <form action="#">
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="person"></ion-icon></span>
+                    <input type="text" required>
                     <label>Username</label>
-                    <i class='bx bxs-user'></i>
                 </div>
-                <div class="input-box animation" style="--i:19; --j:2;">
-                    <input type="text" required name="email">
+            <form action="../Controller/registro.php" method="POST">
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="mail"></ion-icon></span>
+                    <input type="email" required>
                     <label>Email</label>
-                    <i class='bx bxs-envelope'></i>
                 </div>
-                <div class="input-box animation" style="--i:20; --j:3;">
-                    <input type="password" required name="password">
+                <div class="input-box">
+                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
+                    <input type="password" required>
                     <label>Password</label>
-                    <i class='bx bxs-lock-alt'></i>
                 </div>
-                <button type="submit" class="btn animation" style="--i:21; --j:4;">Sign Up</button>
-                <div class="logreg-link animation" style="--i:22; --j:5;">
+                <div class="remember-forgot">
+                    <label><input type="checkbox">I agree to the terms & conditions</label>
+                </div>
+                <button type="submit" class="btn">Register</button>
+                <div class="login-register">
                     <p>Already have an account? <a href="#" class="login-link">Login</a></p>
                 </div>
             </form>
-
         </div>
-        <div class="info-text register">
-            <h2 class="animation" style="--i:17; --j:0;">Welcome Back!</h2>
-            <p class="animation" style="--i:18; --j:1;">Lorem ipsum dolor sit, amet consectetur adipisicing</p>
-        </div>
-
     </div>
 
-    <script src="../Js/script.js"></script>
 
+    <script src="../JS/script.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>
 </html>
