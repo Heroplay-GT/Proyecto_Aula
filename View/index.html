@@ -29,16 +29,16 @@
             <form action="../Controller/login.php" method="POST">
                 <div class="input-box">
                     <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" required>
+                    <input type="text" name="username" required>
                     <label>Username</label>
                 </div>
                 <div class="input-box">
                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" required>
+                    <input type="password" name="password" required>
                     <label>Password</label>
                 </div>
                 <div class="remember-forgot">
-                    <label><input type="checkbox"> Remember me</label>
+                    <label><input type="checkbox" name="remember"> Remember me</label>
                     <a href="#">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
@@ -51,25 +51,24 @@
         <!--Formulario registro-->
         <div class="form-box register">
             <h2>Registration</h2>
-            <form action="#">
-                <div class="input-box">
-                    <span class="icon"><ion-icon name="person"></ion-icon></span>
-                    <input type="text" required>
-                    <label>Username</label>
-                </div>
             <form action="../Controller/registro.php" method="POST">
                 <div class="input-box">
+                    <span class="icon"><ion-icon name="person"></ion-icon></span>
+                    <input type="text" name="username" required>
+                    <label>Username</label>
+                </div>
+                <div class="input-box">
                     <span class="icon"><ion-icon name="mail"></ion-icon></span>
-                    <input type="email" required>
+                    <input type="email" name="email" required>
                     <label>Email</label>
                 </div>
                 <div class="input-box">
                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" required>
+                   <input type="password" name="password" required>
                     <label>Password</label>
                 </div>
                 <div class="remember-forgot">
-                    <label><input type="checkbox">I agree to the terms & conditions</label>
+                    <label><input type="checkbox" name="agree"> I agree to the terms & conditions</label>
                 </div>
                 <button type="submit" class="btn">Register</button>
                 <div class="login-register">
@@ -78,7 +77,6 @@
             </form>
         </div>
     </div>
-
 
     <script src="../JS/script.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
