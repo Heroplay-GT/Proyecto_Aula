@@ -2,7 +2,7 @@
 if (!defined('DB_CONNECTED')) {
     define('DB_CONNECTED', true);
 
-    $host = "localhost";    
+    $host = "192.168.1.11";    
     $user = "root";        
     $password = "";           
     $database = "parkingo";  

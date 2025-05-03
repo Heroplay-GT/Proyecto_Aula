@@ -255,3 +255,22 @@ header{
 .login-register p a:hover{
     text-decoration: underline;
 }
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+.input-box {
+    position: relative;
+}

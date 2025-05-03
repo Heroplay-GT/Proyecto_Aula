@@ -34,5 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         echo "<script>alert('Por favor completa todos los campos'); window.location.href='../View/index.html';</script>";
     }
+
+    
 }
 ?>

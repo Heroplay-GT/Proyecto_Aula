@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkinGO</title>
     <link rel="stylesheet" href="../CSS/style.css">
 </head>
+
 <body>
-    
+
     <header>
         <h2 class="logo">ParkinGO</h2>
         <nav class="navigation">
-                <a href="#">Home</a>
-                <a href="#">About</a>
-                <a href="#">Services</a>
-                <a href="#">Contact</a>
-                <button class="btnLogin-popup">Login</button>
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Services</a>
+            <a href="#">Contact</a>
+            <button class="btnLogin-popup">Login</button>
         </nav>
     </header>
 
@@ -32,11 +34,16 @@
                     <input type="text" name="username" required>
                     <label>Username</label>
                 </div>
+
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                    <input type="password" name="password" required>
+                    <input type="password" name="password" id="loginPassword" required>
                     <label>Password</label>
+                    <span class="toggle-password" data-target="loginPassword">
+                        <ion-icon name="eye-off-outline"></ion-icon>
+                    </span>
                 </div>
+
+
                 <div class="remember-forgot">
                     <label><input type="checkbox" name="remember"> Remember me</label>
                     <a href="#">Forgot password?</a>
@@ -62,11 +69,17 @@
                     <input type="email" name="email" required>
                     <label>Email</label>
                 </div>
+
                 <div class="input-box">
                     <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
-                   <input type="password" name="password" required>
+                    <input type="password" name="password" id="registerPassword" required>
                     <label>Password</label>
+                    <span class="toggle-password" data-target="registerPassword">
+                        <ion-icon name="eye-off-outline"></ion-icon>
+                    </span>
                 </div>
+
+
                 <div class="remember-forgot">
                     <label><input type="checkbox" name="agree"> I agree to the terms & conditions</label>
                 </div>
@@ -81,5 +94,7 @@
     <script src="../JS/script.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
 </body>
+
 </html>
