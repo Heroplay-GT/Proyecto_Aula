@@ -29,10 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/cliente.php';</script>";
             }
         } else {
-            echo "<script>alert('Contraseña incorrecta'); window.location.href='../View/index.html';</script>";
+            echo "<script>alert('Contraseña incorrecta'); window.location.href='../View/index.php';</script>";
         }
     } else {
-        echo "<script>alert('Usuario no encontrado'); window.location.href='../View/index.html';</script>";
+        echo "<script>alert('Usuario no encontrado'); window.location.href='../View/index.php';</script>";
     }
 }
 ?>
