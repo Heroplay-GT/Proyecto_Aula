@@ -20,21 +20,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $resultado = $stmt->get_result();
 
         if ($resultado->num_rows > 0) {
-            echo "<script>alert('El nombre de usuario o email ya están registrados'); window.location.href='../View/index.html';</script>";
+            echo "<script>alert('El nombre de usuario o email ya están registrados'); window.location.href='../View/index.php';</script>";
         } else {
             // Insertar un nuevo usuario
             $stmt = $conexion->prepare("INSERT INTO usuarios (username, email, password) VALUES (?, ?, ?)");
             $stmt->bind_param("sss", $username, $email, $hashed_password);
             if ($stmt->execute()) {
-                echo "<script>alert('Registro exitoso'); window.location.href='../View/index.html';</script>";
+                echo "<script>alert('Registro exitoso'); window.location.href='../View/index.php';</script>";
             } else {
-                echo "<script>alert('Error al registrar'); window.location.href='../View/index.html';</script>";
+                echo "<script>alert('Error al registrar'); window.location.href='../View/index.php';</script>";
             }
         }
     } else {
-        echo "<script>alert('Por favor completa todos los campos'); window.location.href='../View/index.html';</script>";
+        echo "<script>alert('Por favor completa todos los campos'); window.location.href='../View/index.php';</script>";
     }
-
-    
 }
 ?>

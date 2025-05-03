@@ -225,7 +225,7 @@ header{
     text-decoration: underline;
 }
 
-.btn{
+.btn {
     width: 100%;
     background: #162938;
     height: 45px;
@@ -236,6 +236,10 @@ header{
     font-weight: 500;
     cursor: pointer;
     outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
 }
 
 .login-register{
@@ -274,3 +278,11 @@ header{
 .input-box {
     position: relative;
 }
+
+.button-container {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+

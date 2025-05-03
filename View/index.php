@@ -71,7 +71,6 @@
                 </div>
 
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="lock-closed"></ion-icon></span>
                     <input type="password" name="password" id="registerPassword" required>
                     <label>Password</label>
                     <span class="toggle-password" data-target="registerPassword">
