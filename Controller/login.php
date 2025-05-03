@@ -24,9 +24,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             // Redirigir según el rol
             if ($fila['username'] === '01xhero') {
-                echo "<script>alert('Bienvenido administrador'); window.location.href='../View/dashboard.html';</script>";
+                echo "<script>alert('Bienvenido administrador'); window.location.href='../View/dashboard.php';</script>";
             } else {
-                echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/cliente.html';</script>";
+                echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/cliente.php';</script>";
             }
         } else {
             echo "<script>alert('Contraseña incorrecta'); window.location.href='../View/index.html';</script>";
