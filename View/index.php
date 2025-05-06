@@ -42,11 +42,9 @@
                         <ion-icon name="eye-off-outline"></ion-icon>
                     </span>
                 </div>
-
-
                 <div class="remember-forgot">
                     <label><input type="checkbox" name="remember"> Remember me</label>
-                    <a href="#">Forgot password?</a>
+                    <a href="recovery.php">Forgot password?</a>
                 </div>
                 <button type="submit" class="btn">Login</button>
                 <div class="login-register">
