@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Recuperar contraseña</title>
-    
+    <link rel="stylesheet" href="../CSS/style2.css">
 </head>
 <body>
     <div class="wrapper">

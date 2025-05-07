@@ -7,6 +7,7 @@ $token = $_GET['token'] ?? '';
 <head>
     <meta charset="UTF-8">
     <title>Restablecer Contraseña</title>
+    <link rel="stylesheet" href="../CSS/style2.css">
     
 </head>
 <body>
