@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
@@ -13,76 +13,75 @@
     <header>
         <h2 class="logo">ParkinGO</h2>
         <nav class="navigation">
-            <a href="#">Home</a>
-            <a href="#">About</a>
-            <a href="#">Services</a>
-            <a href="#">Contact</a>
-            <button class="btnLogin-popup">Login</button>
+            <a href="#">Inicio</a>
+            <a href="#">Acerca de</a>
+            <a href="#">Servicios</a>
+            <a href="#">Contacto</a>
+            <button class="btnLogin-popup">Iniciar sesión</button>
         </nav>
     </header>
 
-    <!--Formulario Login-->
+    <!--Formulario de inicio de sesión-->
     <div class="wrapper">
         <span class="icon-close">
             <ion-icon name="close"></ion-icon>
         </span>
         <div class="form-box login">
-            <h2>Login</h2>
+            <h2>Iniciar sesión</h2>
             <form action="../Controller/login.php" method="POST">
                 <div class="input-box">
                     <span class="icon"><ion-icon name="person"></ion-icon></span>
                     <input type="text" name="username" required>
-                    <label>Username</label>
+                    <label>Nombre de usuario</label>
                 </div>
 
                 <div class="input-box">
                     <input type="password" name="password" id="loginPassword" required>
-                    <label>Password</label>
+                    <label>Contraseña</label>
                     <span class="toggle-password" data-target="loginPassword">
                         <ion-icon name="eye-off-outline"></ion-icon>
                     </span>
                 </div>
                 <div class="remember-forgot">
-                    <label><input type="checkbox" name="remember"> Remember me</label>
-                    <a href="recovery.php">Forgot password?</a>
+                    <label><input type="checkbox" name="remember"> Recuérdame</label>
+                    <a href="recovery.php">¿Olvidaste tu contraseña?</a>
                 </div>
-                <button type="submit" class="btn">Login</button>
+                <button type="submit" class="btn">Iniciar sesión</button>
                 <div class="login-register">
-                    <p>Don't have an account? <a href="#" class="register-link">Register</a></p>
+                    <p>¿No tienes una cuenta? <a href="#" class="register-link">Regístrate</a></p>
                 </div>
             </form>
         </div>
 
-        <!--Formulario registro-->
+        <!--Formulario de registro-->
         <div class="form-box register">
-            <h2>Registration</h2>
+            <h2>Registro</h2>
             <form action="../Controller/registro.php" method="POST">
                 <div class="input-box">
                     <span class="icon"><ion-icon name="person"></ion-icon></span>
                     <input type="text" name="username" required>
-                    <label>Username</label>
+                    <label>Nombre de usuario</label>
                 </div>
                 <div class="input-box">
                     <span class="icon"><ion-icon name="mail"></ion-icon></span>
                     <input type="email" name="email" required>
-                    <label>Email</label>
+                    <label>Correo electrónico</label>
                 </div>
 
                 <div class="input-box">
                     <input type="password" name="password" id="registerPassword" required>
-                    <label>Password</label>
+                    <label>Contraseña</label>
                     <span class="toggle-password" data-target="registerPassword">
                         <ion-icon name="eye-off-outline"></ion-icon>
                     </span>
                 </div>
 
-
                 <div class="remember-forgot">
-                    <label><input type="checkbox" name="agree"> I agree to the terms & conditions</label>
+                    <label><input type="checkbox" name="agree"> Acepto los términos y condiciones</label>
                 </div>
-                <button type="submit" class="btn">Register</button>
+                <button type="submit" class="btn">Registrarse</button>
                 <div class="login-register">
-                    <p>Already have an account? <a href="#" class="login-link">Login</a></p>
+                    <p>¿Ya tienes una cuenta? <a href="#" class="login-link">Iniciar sesión</a></p>
                 </div>
             </form>
         </div>
