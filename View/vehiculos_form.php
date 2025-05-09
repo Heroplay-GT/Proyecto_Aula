@@ -1,20 +1,22 @@
 <?php
 $titulo = 'Ingresar Vehículo - Parking Go';
 ob_start();
+
+$success = isset($_GET['success']);
+$error = isset($_GET['error']);
 ?>
 
 <div class="wrapper active-popup">
-    
     <div class="form-box login">
         <h2>Ingreso de Vehículo</h2>
-        
-        <?php if (!empty($error)): ?>
-            <div class="error-message"><?= htmlspecialchars($error) ?></div>
-        <?php elseif (!empty($success)): ?>
-            <div class="success-message"><?= htmlspecialchars($success) ?></div>
+
+        <?php if ($error): ?>
+            <div class="error-message">Error al registrar el vehículo</div>
+        <?php elseif ($success): ?>
+            <div class="success-message">Vehículo registrado exitosamente</div>
         <?php endif; ?>
 
-        <form action="/ingresarVehiculo" method="post">
+        <form method="POST" action="../Controller/VehiculoController.php">
             <div class="input-box">
                 <span class="icon"><i class="fas fa-car"></i></span>
                 <input type="text" name="placa" required>
@@ -35,11 +37,11 @@ ob_start();
         </form>
 
         <div class="login-register">
-            <p><a href="../cliente.php">Volver al inicio</a></p>
+            <p><a href="cliente.php">Volver al inicio</a></p>
         </div>
     </div>
 </div>
 
 <?php
 $contenido = ob_get_clean();
-include '../Templates/layout.php';
+include '../View/Templates/layout.php';

@@ -1,6 +1,6 @@
 <?php
 session_start();
-include("conexion.php");
+include("../conexion.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Recibir los datos del formulario
@@ -34,5 +34,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         echo "<script>alert('Usuario no encontrado'); window.location.href='../View/index.php';</script>";
     }
+
+    if (password_verify($password, $fila['password'])) {
+        $_SESSION['username'] = $fila['username'];
+        $_SESSION['id'] = $fila['id']; // <- AGREGA ESTA LÍNEA
+    
+        // Redirigir según el rol
+        if ($fila['username'] === '01xhero') {
+            echo "<script>alert('Bienvenido administrador'); window.location.href='../View/dashboard.php';</script>";
+        } else {
+            echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/cliente.php';</script>";
+        }
+    }
+    
 }
 ?>

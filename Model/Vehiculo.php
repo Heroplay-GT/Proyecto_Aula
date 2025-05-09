@@ -1,14 +1,15 @@
 <?php
 class Vehiculo {
-    public $placa;
-    public $tipo;
+    private $conexion;
 
-    public function __construct($placa, $tipo) {
-        $this->placa = $placa;
-        $this->tipo = $tipo;
+    public function __construct($conexion) {
+        $this->conexion = $conexion;
     }
 
-    public function esValido() {
-        return !empty($this->placa) && !empty($this->tipo);
+    public function insertar($placa, $tipo, $usuario_id) {
+        $sql = "INSERT INTO vehiculos (placa, tipo, usuario_id) VALUES (?, ?, ?)";
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("ssi", $placa, $tipo, $usuario_id);
+        return $stmt->execute();
     }
 }

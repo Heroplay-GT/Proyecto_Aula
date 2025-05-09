@@ -5,7 +5,7 @@ use PHPMailer\PHPMailer\Exception;
 require '../PHPMailer/src/PHPMailer.php';
 require '../PHPMailer/src/SMTP.php';
 require '../PHPMailer/src/Exception.php';
-include("conexion.php");
+include("../conexion.php");
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST['email']);

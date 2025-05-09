@@ -1,32 +1,35 @@
 <?php
-require_once 'models/VehiculoModel.php';
+session_start();
+include '../conexion.php';
+include '../Model/Vehiculo.php';
 
-class VehiculoController {
+// Asegurarse de que el usuario esté logueado
+if (!isset($_SESSION['username'])) {
+    header("Location: ../View/index.php");
+    exit;
+}
 
-    public function mostrarFormulario() {
-        include '../View/Vehiculos/ingresar.php';
-    }
+// Obtener ID del usuario
+$username = $_SESSION['username'];
+$sql = "SELECT id FROM usuarios WHERE username = ?";
+$stmt = $conexion->prepare($sql);
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$usuario = $result->fetch_assoc();
+$usuario_id = $usuario['id'];
 
-    public function registrar() {
-        $error = '';
-        $success = '';
+// Procesar formulario
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $placa = trim($_POST['placa']);
+    $tipo = trim($_POST['tipo']);
 
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $placa = trim($_POST['placa']);
-            $tipo = trim($_POST['tipo']);
-
-            if (empty($placa) || empty($tipo)) {
-                $error = "Todos los campos son obligatorios.";
-            } else {
-                $modelo = new VehiculoModel();
-                if ($modelo->insertar($placa, $tipo)) {
-                    $success = "Vehículo registrado exitosamente.";
-                } else {
-                    $error = "Error al registrar el vehículo. Puede que la placa ya exista.";
-                }
-            }
-        }
-
-        include 'views/formulario.php';
+    $vehiculo = new Vehiculo($conexion);
+    if ($vehiculo->insertar($placa, $tipo, $usuario_id)) {
+        header("Location: ../View/vehiculos_form.php?success=1");
+        exit;
+    } else {
+        header("Location: ../View/vehiculos_form.php?error=1");
+        exit;
     }
 }
