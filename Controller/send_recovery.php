@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->execute();
 
         // Enlace de recuperación
-        $link = "http://localhost/PA/View/reset_password.php?token=$token";
+        $link = "http://localhost/Proyecto_Aula/View/Auth/reset_password.php?token=$token";
 
         // Enviar email con PHPMailer
         $mail = new PHPMailer(true);
@@ -46,12 +46,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $mail->Body = "Haz clic aquí para recuperar tu contraseña: $link";
 
             $mail->send();
-            echo "<script>alert('Revisa tu correo para recuperar la contraseña'); window.location.href='../View/index.php';</script>";
+            echo "<script>alert('Revisa tu correo para recuperar la contraseña'); window.location.href='../View/Home.php';</script>";
         } catch (Exception $e) {
             echo "<script>alert('Error al enviar correo: {$mail->ErrorInfo}');</script>";
         }
     } else {
-        echo "<script>alert('Correo no registrado'); window.location.href='../View/index.php';</script>";
+        echo "<script>alert('Correo no registrado'); window.location.href='../View/Home.php';</script>";
     }
 }
 ?>

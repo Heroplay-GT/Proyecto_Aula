@@ -26,10 +26,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $vehiculo = new Vehiculo($conexion);
     if ($vehiculo->insertar($placa, $tipo, $usuario_id)) {
-        header("Location: ../View/vehiculos_form.php?success=1");
+        header("Location: ../View/Vehiculos/formulario.php?success=1");
         exit;
     } else {
-        header("Location: ../View/vehiculos_form.php?error=1");
+        header("Location: ../View/Vehiculos/Formulario.php?error=1");
         exit;
     }
 }

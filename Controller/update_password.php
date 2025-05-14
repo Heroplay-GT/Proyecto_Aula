@@ -25,12 +25,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("s", $token);
             $stmt->execute();
 
-            echo "<script>alert('Contraseña actualizada correctamente'); window.location.href='../View/index.php';</script>";
+            echo "<script>alert('Contraseña actualizada correctamente'); window.location.href='../View/Home.php';</script>";
         } else {
-            echo "<script>alert('El token ha expirado'); window.location.href='../View/index.php';</script>";
+            echo "<script>alert('El token ha expirado'); window.location.href='../View/Home.php';</script>";
         }
     } else {
-        echo "<script>alert('Token inválido'); window.location.href='../View/index.php';</script>";
+        echo "<script>alert('Token inválido'); window.location.href='../Home/index.php';</script>";
     }
 }
 ?>
