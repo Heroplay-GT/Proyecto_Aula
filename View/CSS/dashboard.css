@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&family=Trocchi&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Raleway:ital,wght@0,100..900;1,100..900&family=Trocchi&display=swap');
+
+:root{
+    --white: #fff6ff;
+    --blue: #162938;
+    --dark-rose: #a586ae;
+    --black:#221824;
+    --font: 'Raleway', sans-serif;
+}
+
+*{
+    margin: 0;
+    padding: 0;
+    font-family: var(--font);
+    box-sizing: border-box;
+}
+
+body{
+    background: var(--white);
+    overflow-x: hidden;
+}
+
+section{
+    position: relative;
+    width: 100%;
+}
+
+.nav{
+    position: fixed;
+    width: 300px;
+    height: 100%;
+    background: var(--blue);
+    border-left: 10px solid var(--blue);
+    overflow: hidden;
+    transition: 0.4s;
+}
+
+.nav.active{
+    width: 80px;
+}
+
+.nav ul{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.nav ul li{
+    position: relative;
+    width: 200%;
+    list-style: none;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.nav ul li:hover,
+.nav ul li.active { 
+    background: var(--white);
+}
+
+.nav ul li:nth-child(1){
+    margin-bottom: 40px;
+    pointer-events: none;
+}
+
+.nav ul li a{
+    position: relative;
+    display: flex;
+    width: 100%;
+    color: var(--white);
+    text-decoration: none;
+}
+
+.nav ul li:hover a,
+.nav ul li.active a {
+    color: var(--blue);
+}
+
+.nav ul li a .icono{
+    position: relative;
+    display: block;
+    min-width: 60px;
+    height: 60px;
+    text-align: center;
+    line-height: 75px;
+}
+
+.nav ul li a .icono ion-icon{
+    font-size: 1.75em;
+}
+
+.nav ul li a .titulo{
+    position: relative;
+    display: block;
+    padding: 0 10px;
+    height: 60px;
+    line-height: 60px;
+    text-align: start;
+    white-space: nowrap;
+}

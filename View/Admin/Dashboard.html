@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="../CSS/dashboard.css" />
+  </head>
+  <body>
+    <section>
+      <!--Menu-->
+
+      <div class="nav">
+        <ul>
+          <li>
+            <a href="#">
+              <span class="icono"><ion-icon name="aperture"></ion-icon></span>
+              <span class="titulo">Logo</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="home-outline"></ion-icon
+              ></span>
+              <span class="titulo">Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="person-outline"></ion-icon
+              ></span>
+              <span class="titulo">Clientes</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="cart-outline"></ion-icon
+              ></span>
+              <span class="titulo">Ventas</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="add"></ion-icon>
+              </span>
+              <span class="titulo">Ingreso Manual</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="settings-outline"></ion-icon
+              ></span>
+              <span class="titulo">Configuración</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <span class="icono"
+                ><ion-icon name="log-out-outline"></ion-icon
+              ></span>
+              <span class="titulo">Cerrar Sesión</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <!-- Fin Menu-->
+
+      <!-- Dashboard-->
+
+      <div class="container">
+        <div class="topbar">
+          <div class="toggle">
+            <ion-icon name="menu"></ion-icon>
+          </div>
+          <div class="buscar">
+            <label for="">
+              <input type="text" placeholder="Buscar..." name="" id="" />
+              <ion-icon name="search"></ion-icon>
+            </label>
+          </div>
+          <div class="perfil-usuario">
+            <img src="profile-photo.jpg" alt="" />
+          </div>
+        </div>
+
+        <div class="detalles"></div>
+      </div>
+      <!-- Fin Dashboard-->
+    </section>
+    <script
+      type="module"
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"
+    ></script>
+    <script
+      nomodule
+      src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"
+    ></script>
+    <script src="../JS/dashboard.js"></script>
+  </body>
+</html>
