@@ -1,0 +1,202 @@
+/* reserva.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-image: url('../../Media/Ilustracion.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.vehiculo-wrapper {
+    position: relative;
+    width: 600px;
+    max-width: 90%;
+    height: auto;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, .5);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    padding: 40px 50px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.vehiculo-wrapper h2 {
+    font-size: 2em;
+    color: #162938;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.vehiculo-form .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    border-bottom: 2px solid #162938;
+    margin: 30px 0;
+}
+
+.vehiculo-form .input-box label {
+    position: absolute;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    color: #162938;
+    font-size: 1em;
+    font-weight: 500;
+    pointer-events: none;
+    transition: .5s;
+}
+
+.vehiculo-form .input-box input:focus~label,
+.vehiculo-form .input-box input:valid~label,
+.vehiculo-form .input-box select:focus~label,
+.vehiculo-form .input-box select:valid~label {
+    top: -5px;
+}
+
+.vehiculo-form .input-box input,
+.vehiculo-form .input-box select {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1em;
+    color: #162938;
+    font-weight: 600;
+    padding: 0 35px 0 5px;
+}
+
+.vehiculo-form .input-box .icon {
+    position: absolute;
+    right: 8px;
+    font-size: 1.2em;
+    color: #162938;
+    line-height: 57px;
+}
+
+.vehiculo-form .input-box select option {
+    background: rgba(255, 255, 255, 0.9);
+    color: #162938;
+}
+
+.btn {
+    width: 100%;
+    height: 45px;
+    background: #162938;
+    border: none;
+    outline: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    color: #fff;
+    font-weight: 500;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    background: rgba(22, 41, 56, 0.8);
+}
+
+#verEspacios {
+    background: transparent;
+    border: 2px solid #162938;
+    color: #162938;
+}
+
+#verEspacios:hover {
+    background: #162938;
+    color: #fff;
+}
+
+.espacios-tabla {
+    margin-top: 20px;
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* Estilos para las tablas de espacios */
+.espacios-tabla table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.espacios-tabla th, 
+.espacios-tabla td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.espacios-tabla th {
+    background-color: #162938;
+    color: white;
+    font-weight: 600;
+}
+
+.espacios-tabla tr:hover {
+    background-color: rgba(22, 41, 56, 0.1);
+}
+
+.espacios-tabla .disponible {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.espacios-tabla .ocupado {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* Mensajes de error y éxito */
+.error-message {
+    color: #dc3545;
+    background: rgba(220, 53, 69, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.success-message {
+    color: #28a745;
+    background: rgba(40, 167, 69, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .vehiculo-wrapper {
+        width: 90%;
+        padding: 30px 20px;
+    }
+    
+    .vehiculo-wrapper h2 {
+        font-size: 1.5em;
+    }
+    
+    .vehiculo-form .input-box {
+        margin: 20px 0;
+    }
+}
