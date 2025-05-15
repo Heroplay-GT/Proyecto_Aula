@@ -5,7 +5,7 @@ if (!defined('DB_CONNECTED')) {
     $host = "localhost";    
     $user = "root";        
     $password = "";           
-    $database = "parkingo";  
+    $database = "parkingo1";  
 
     $conexion = new mysqli($host, $user, $password, $database);
 
