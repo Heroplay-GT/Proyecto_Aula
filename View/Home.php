@@ -16,7 +16,8 @@
             <a href="#">Inicio</a>
             <a href="#">Acerca de</a>
             <a href="#">Servicios</a>
-            <a href="#">Contacto</a>
+            <a href="#" class="contact-link">Contacto</a>
+
             <button class="btnLogin-popup">Iniciar sesión</button>
         </nav>
     </header>
@@ -85,6 +86,18 @@
                 </div>
             </form>
         </div>
+
+        <!--Formulario de contacto-->
+<div class="form-box contacto">
+    <h2>Contáctame</h2>
+    <p style="text-align: center; margin-bottom: 20px;">¿Tienes dudas? Escríbeme por WhatsApp</p>
+    <div class="input-box" style="justify-content: center;">
+        <span class="icon"><ion-icon name="logo-whatsapp"></ion-icon></span>
+        <a class="btn" style="text-align: center;" target="_blank"
+            href="https://wa.me/573009048312">Enviar mensaje</a>
+    </div>
+</div>
+
     </div>
 
     <script src="../View/JS/script.js"></script>

@@ -38,4 +38,67 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+const wraper = document.querySelector('.wrapper');
+const contactLink = document.querySelector('.contact-link');
+const contactForm = document.querySelector('.form-box.contacto');
+const loginForm = document.querySelector('.form-box.login');
+const registerForm = document.querySelector('.form-box.register');
+const closeIcon = document.querySelector('.icon-close');
+const closeContactIcon = document.querySelector('.icon-close-contacto');
+
+contactLink.addEventListener('click', () => {
+    wrapper.classList.add('active-popup');
+    contactForm.style.display = 'block';
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'none';
+});
+
+closeIcon.addEventListener('click', () => {
+    wrapper.classList.remove('active-popup');
+    contactForm.style.display = 'none';
+    loginForm.style.display = 'block'; // vuelve al login por defecto
+});
+
+btnPopup.addEventListener('click', () => {
+    wrapper.classList.add('active-popup');
+    loginForm.style.display = 'block';
+    registerForm.style.display = 'none';
+    contactForm.style.display = 'none';
+});
+
+// Mostrar formulario de registro
+registerLink.addEventListener('click', () => {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+    contactForm.style.display = 'none';
+});
+
+// Volver al formulario de login desde el registro
+loginLink.addEventListener('click', () => {
+    registerForm.style.display = 'none';
+    loginForm.style.display = 'block';
+    contactForm.style.display = 'none';
+});
+
+// Mostrar contacto (WhatsApp)
+contactLink.addEventListener('click', () => {
+    wrapper.classList.add('active-popup');
+    contactForm.style.display = 'block';
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'none';
+});
+
+// Cerrar login o registro
+closeIcon.addEventListener('click', () => {
+    wrapper.classList.remove('active-popup');
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'none';
+});
+
+// Cerrar formulario de contacto sin abrir login
+closeContactIcon.addEventListener('click', () => {
+    wrapper.classList.remove('active-popup');
+    contactForm.style.display = 'none';
+});
+
 
