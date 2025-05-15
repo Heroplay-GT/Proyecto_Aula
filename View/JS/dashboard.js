@@ -13,4 +13,13 @@ lista.forEach((item) => {
     item.addEventListener('mouseover', activarLink);
 });
 
+var toggle = document.querySelector('.toggle');
+var nav = document.querySelector('.nav');
+var container = document.querySelector('.container');
+
+toggle.onclick = function() {
+    nav.classList.toggle('active');
+    container.classList.toggle('active');
+}
+
 
