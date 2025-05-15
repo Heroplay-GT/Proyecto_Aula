@@ -8,7 +8,7 @@
         <?php echo $titulo ?? 'Parkiing Go'; ?>
     </title>
     <!-- Si el CSS está en la raíz de tu proyecto: -->
-    <link rel="stylesheet" href="/Proyecto_Aula/CSS/style.css">
+    <link rel="stylesheet" href="/Proyecto_Aula/View/CSS/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
