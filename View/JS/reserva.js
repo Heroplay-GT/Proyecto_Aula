@@ -1,71 +1,142 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Elementos del DOM
     const tipoVehiculo = document.getElementById("tipoVehiculo");
-    const precio = document.getElementById("precio");
-    const verEspacios = document.getElementById("verEspacios");
-    const contenedorTablas = document.getElementById("tablasEspacios");
+    const precioInput = document.getElementById("precio");
+    const verEspaciosBtn = document.getElementById("verEspacios");
+    const selectEspacio = document.getElementById("selectEspacio");
+    const modal = document.getElementById("espaciosModal");
+    const closeModal = document.querySelector(".close-modal");
+    const contenidoEspacios = document.getElementById("contenidoEspacios");
+    const filtroTipo = document.getElementById("filtroTipo");
 
-    // Manejar cambio de tipo de vehículo
-    tipoVehiculo.addEventListener("change", () => {
-        switch (tipoVehiculo.value) {
-            case "Carro":
-                precio.value = "5000";
-                break;
-            case "Moto":
-                precio.value = "3000";
-                break;
-            case "Bicicleta":
-                precio.value = "1000";
-                break;
-            default:
-                precio.value = "";
-        }
+    // Event Listeners
+    tipoVehiculo.addEventListener("change", function() {
+        // Limpiar campos al cambiar tipo
+        selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione espacio</option>';
+        selectEspacio.disabled = true;
+        precioInput.value = "";
+        
+        cargarEspaciosDisponibles();
+    });
+    
+    verEspaciosBtn.addEventListener("click", mostrarModalEspacios);
+    selectEspacio.addEventListener("change", actualizarPrecio);
+    closeModal.addEventListener("click", cerrarModal);
+    filtroTipo.addEventListener("change", cargarEspaciosModal);
+
+    // Cerrar modal haciendo clic fuera del contenido
+    window.addEventListener("click", (e) => {
+        if (e.target === modal) cerrarModal();
     });
 
-    // Manejar clic en ver espacios
-    verEspacios.addEventListener("click", () => {
-        fetch("../Controller/ConsultarEspacios.php")
-            .then(response => {
-                if (!response.ok) throw new Error("Error en la red");
-                return response.json();
-            })
+    function cerrarModal() {
+        modal.style.display = "none";
+    }
+
+    function mostrarModalEspacios() {
+        modal.style.display = "block";
+        cargarEspaciosModal();
+    }
+
+    function cargarEspaciosModal() {
+        const tipo = filtroTipo.value;
+        contenidoEspacios.innerHTML = '<p class="loading">Cargando espacios...</p>';
+
+        fetch(`../../Controller/ConsultarEspacios.php?tipo=${tipo === 'all' ? '' : tipo}`)
+            .then(response => response.json())
             .then(data => {
-                contenedorTablas.innerHTML = generarTablasHTML(data);
+                if (data.error) throw new Error(data.error);
+                contenidoEspacios.innerHTML = data.length > 0 
+                    ? generarCardsEspacios(data) 
+                    : '<p class="no-espacios">No hay espacios disponibles</p>';
+                agregarEventosCards();
             })
             .catch(err => {
                 console.error("Error:", err);
-                mostrarMensaje('error', 'Error al cargar espacios');
+                contenidoEspacios.innerHTML = `<p class="error">Error al cargar espacios: ${err.message}</p>`;
             });
-    });
-
-    // Función para generar tablas HTML
-    function generarTablasHTML(data) {
-        const estados = ["Libres", "Reservados", "Ocupados"];
-        let html = "<div class='tablas-container'>";
-        
-        estados.forEach(estado => {
-            if(data[estado.toLowerCase()] && data[estado.toLowerCase()].length > 0) {
-                html += `<h3>${estado}</h3><table border="1"><tr><th>ID</th><th>Espacio</th></tr>`;
-                data[estado.toLowerCase()].forEach(espacio => {
-                    html += `<tr><td>${espacio.id}</td><td>${espacio.nombre}</td></tr>`;
-                });
-                html += `</table>`;
-            }
-        });
-        
-        html += "</div>";
-        return html;
     }
 
-    // Función para mostrar mensajes
-    function mostrarMensaje(tipo, mensaje) {
-        const elemento = document.getElementById(`${tipo}-message`);
-        if(elemento) {
-            elemento.textContent = mensaje;
-            elemento.style.display = 'block';
-            
-            setTimeout(() => {
-                elemento.style.display = 'none';
-            }, 3000);
+    function generarCardsEspacios(espacios) {
+        return espacios.map(espacio => `
+            <div class="espacio-card ${espacio.estado.toLowerCase()}" 
+                 data-id="${espacio.id}" 
+                 data-codigo="${espacio.codigo}" 
+                 data-precio="${espacio.precio_hora}"
+                 data-tipo="${espacio.tipo_vehiculo}">
+                <h3>${espacio.codigo}</h3>
+                <p>${espacio.tipo_vehiculo} - $${espacio.precio_hora.toLocaleString('es-CO')}/h</p>
+            </div>
+        `).join('');
+    }
+
+    function cargarEspaciosDisponibles() {
+        const tipo = tipoVehiculo.value;
+        if (!tipo) return;
+
+        fetch(`../../Controller/ReservaController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                
+                selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione espacio</option>';
+                
+                if (data.data && data.data.length > 0) {
+                    // Mostrar el precio del primer espacio disponible como referencia
+                    if (data.data[0].precio_hora) {
+                        precioInput.value = `$${data.data[0].precio_hora.toLocaleString('es-CO')}/hora`;
+                    }
+                    
+                    data.data.forEach(espacio => {
+                        const option = new Option(
+                            `${espacio.codigo}`, 
+                            espacio.id
+                        );
+                        option.dataset.precio = espacio.precio_hora;
+                        selectEspacio.add(option);
+                    });
+                    selectEspacio.disabled = false;
+                } else {
+                    selectEspacio.innerHTML = '<option value="" disabled selected hidden>No hay espacios disponibles</option>';
+                }
+            })
+            .catch(err => console.error("Error:", err));
+    }
+
+    function agregarEventosCards() {
+        document.querySelectorAll('.espacio-card').forEach(card => {
+            card.addEventListener('click', function() {
+                if (this.classList.contains('disponible')) {
+                    // Actualizar tipo de vehículo si es diferente
+                    if (tipoVehiculo.value !== this.dataset.tipo) {
+                        tipoVehiculo.value = this.dataset.tipo;
+                    }
+                    
+                    // Seleccionar el espacio
+                    selectEspacio.innerHTML = '';
+                    const option = new Option(
+                        `${this.dataset.codigo}`,
+                        this.dataset.id
+                    );
+                    option.dataset.precio = this.dataset.precio;
+                    selectEspacio.add(option);
+                    selectEspacio.value = this.dataset.id;
+                    selectEspacio.disabled = false;
+                    
+                    // Actualizar precio
+                    precioInput.value = `$${parseFloat(this.dataset.precio).toLocaleString('es-CO')}/hora`;
+                    
+                    // Cerrar modal
+                    cerrarModal();
+                }
+            });
+        });
+    }
+
+    function actualizarPrecio() {
+        const selectedOption = selectEspacio.options[selectEspacio.selectedIndex];
+        if (selectedOption && selectedOption.dataset.precio) {
+            precioInput.value = `$${parseFloat(selectedOption.dataset.precio).toLocaleString('es-CO')}/hora`;
         }
     }
 });

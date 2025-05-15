@@ -7,7 +7,7 @@ ob_start();
         <h2 class="logo">Parking Go</h2>
         <nav class="navigation">
             <a href="configuracion.php">Configuración</a>
-            <a href="index.php">Salir</a>
+            <a href="../Home.php">Salir</a>
         </nav>
     </header>
 
@@ -18,7 +18,7 @@ ob_start();
             <div class="button-container">
                 <a class="btn" href="../Vehiculos/Formulario.php">Vehículo</a>
                 <a class="btn" href="facturacion.php">Factura</a>
-                <a class="btn" href="index.php">Salir</a>
+                <a class="btn" href="../Home.php">Salir</a>
             </div>
         </div>
     </div>

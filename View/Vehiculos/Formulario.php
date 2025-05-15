@@ -9,10 +9,17 @@
 </head>
 
 <body>
+    <div class="header-actions">
+        <a href="../Clientes/Perfil.php" class="btn-regresar">
+            <ion-icon name="chevron-back-circle-outline"></ion-icon>
+            <span>Volver al inicio</span>
+        </a>
+    </div>
+
     <div class="vehiculo-wrapper">
         <h2>Reservar Espacio</h2>
 
-        <form id="reservaForm" method="POST" action="../../Controller/VehiculoController.php" class="vehiculo-form">
+        <form id="reservaForm" method="POST" action="../../Controller/ReservaController.php" class="vehiculo-form">
             <div class="form-row">
                 <div class="input-box">
                     <span class="icon"><ion-icon name="car"></ion-icon></span>
@@ -46,20 +53,32 @@
 
             <div class="form-row">
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="cash"></ion-icon></span>
-                    <input type="text" id="precio" name="precio" readonly>
+                    <select name="espacio" id="selectEspacio" required disabled>
+                        <option value="" disabled selected hidden>Espacio a utilizar</option>
+                    </select>
                 </div>
                 <div class="input-box">
-                    <span class="icon"><ion-icon name="grid"></ion-icon></span>
-                    <input type="text" name="espacio" required>
-                    <label>Espacio a utilizar</label>
+                    <span class="icon"><ion-icon name="cash"></ion-icon></span>
+                    <input type="text" id="precio" name="precio" readonly>
                 </div>
             </div>
 
             <button type="button" id="verEspacios" class="btn">Ver Espacios</button>
 
-            <div id="tablasEspacios" class="espacios-tabla">
-                <!-- Aquí se mostrarán las tablas de espacios -->
+            <div id="espaciosModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal">&times;</span>
+                    <h2>Espacios Disponibles</h2>
+                    <div class="filtros">
+                        <select id="filtroTipo">
+                            <option value="all">Todos los tipos</option>
+                            <option value="Carro">Carros</option>
+                            <option value="Moto">Motos</option>
+                            <option value="Bicicleta">Bicicletas</option>
+                        </select>
+                    </div>
+                    <div id="contenidoEspacios" class="espacios-container"></div>
+                </div>
             </div>
 
             <div id="error-message" class="error-message"></div>
