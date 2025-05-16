@@ -8,15 +8,24 @@ class Reserva
         $this->conexion = $conexion;
     }
 
-    public function obtenerEspaciosDisponibles($tipo_vehiculo)
+    public function obtenerTodosLosEspacios()
     {
-        // Validación adicional
-        if (empty($tipo_vehiculo)) {
-            error_log("Tipo de vehículo vacío");
+        $sql = "SELECT e.id, e.codigo, e.precio_hora, e.tipo_vehiculo, e.estado
+            FROM espacios e
+            ORDER BY e.codigo";
+
+        $result = $this->conexion->query($sql);
+        if (!$result) {
+            error_log("Error en consulta: " . $this->conexion->error);
             return false;
         }
 
-        $sql = "SELECT id, codigo, precio_hora, tipo_vehiculo 
+        return $result;
+    }
+
+    public function obtenerEspaciosDisponibles($tipo_vehiculo)
+    {
+        $sql = "SELECT id, codigo, precio_hora, tipo_vehiculo
             FROM espacios 
             WHERE tipo_vehiculo = ? 
             AND estado = 'Disponible'
@@ -35,12 +44,7 @@ class Reserva
             return false;
         }
 
-        $resultado = $stmt->get_result();
-
-        // Debug: Registrar cantidad de resultados
-        error_log("Espacios encontrados para {$tipo_vehiculo}: " . $resultado->num_rows);
-
-        return $resultado;
+        return $stmt->get_result();
     }
 
     // Registrar nuevo vehículo ingresado
@@ -49,21 +53,40 @@ class Reserva
         $this->conexion->begin_transaction();
         try {
             // 1. Verificar que el espacio esté disponible
-            $check = $this->conexion->query("SELECT estado FROM espacios WHERE id = $espacio_id");
-            if ($check->fetch_assoc()['estado'] !== 'Disponible') {
+            $stmtCheck = $this->conexion->prepare("SELECT estado FROM espacios WHERE id = ?");
+            $stmtCheck->bind_param("i", $espacio_id);
+            $stmtCheck->execute();
+            $resultadoCheck = $stmtCheck->get_result();
+
+            if ($resultadoCheck->num_rows === 0) {
+                throw new Exception("El espacio no existe");
+            }
+
+            $espacio = $resultadoCheck->fetch_assoc();
+            if ($espacio['estado'] !== 'Disponible') {
                 throw new Exception("El espacio no está disponible");
             }
 
-            // 2. Insertar en reservas (corregido espacio_id)
+            // 2. Insertar en reservas
             $sql = "INSERT INTO reservas 
-                (placa, tipo, modelo, espacio_id, contacto, usuarios_id, estado)
-                VALUES (?, ?, ?, ?, ?, ?, 'Activo')";
+                (placa, tipo, modelo, espacio_id, contacto, usuarios_id, estado, fecha_reserva, qr_code) 
+                VALUES (?, ?, ?, ?, ?, ?, 'Pendiente', NOW(), '')";
             $stmt = $this->conexion->prepare($sql);
+            if (!$stmt) {
+                throw new Exception("Error preparando consulta: " . $this->conexion->error);
+            }
+
             $stmt->bind_param("sssisi", $placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id);
-            $stmt->execute();
+            if (!$stmt->execute()) {
+                throw new Exception("Error ejecutando consulta: " . $stmt->error);
+            }
 
             // 3. Ocupar espacio
-            $this->conexion->query("UPDATE espacios SET estado = 'Ocupado' WHERE id = $espacio_id");
+            $stmtUpdate = $this->conexion->prepare("UPDATE espacios SET estado = 'Ocupado' WHERE id = ?");
+            $stmtUpdate->bind_param("i", $espacio_id);
+            if (!$stmtUpdate->execute()) {
+                throw new Exception("Error actualizando espacio: " . $stmtUpdate->error);
+            }
 
             $this->conexion->commit();
             return true;
@@ -73,6 +96,7 @@ class Reserva
             return false;
         }
     }
+
     // Obtener vehículos activos
     public function obtenerVehiculosActivos()
     {
@@ -126,5 +150,80 @@ class Reserva
             $this->conexion->rollback();
             return false;
         }
+    }
+
+    public function obtenerReservasPorUsuario($usuario_id)
+    {
+        $sql = "SELECT r.*, e.codigo as espacio_codigo 
+            FROM reservas r
+            JOIN espacios e ON r.espacio_id = e.id
+            WHERE r.usuarios_id = ?
+            ORDER BY r.fecha_reserva DESC";
+
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("i", $usuario_id);
+        $stmt->execute();
+        return $stmt->get_result();
+    }
+
+    public function generarCodigoQR($reserva_id)
+    {
+        try {
+            // Verificar que la librería está disponible
+            if (!class_exists('Endroid\QrCode\QrCode')) {
+                throw new Exception("La librería QR Code no está instalada correctamente");
+            }
+
+            // Configurar rutas
+            $qrData = "RESERVA-" . $reserva_id;
+            $qrFilename = "qr_" . $reserva_id . ".png";
+            $qrDir = __DIR__ . "/../../Media/QRCodes";
+            $qrPath = $qrDir . "/" . $qrFilename;
+
+            // Crear directorio si no existe
+            if (!file_exists($qrDir)) {
+                if (!mkdir($qrDir, 0777, true)) {
+                    throw new Exception("No se pudo crear el directorio QRCodes");
+                }
+            }
+
+            // Configuración del QR para v5.x
+            $qrCode = \Endroid\QrCode\Builder\Builder::create()
+                ->data($qrData)
+                ->size(300)
+                ->margin(10)
+                ->build();
+
+            // Guardar el QR
+            $qrCode->saveToFile($qrPath);
+
+            // Actualizar la base de datos
+            $stmt = $this->conexion->prepare("UPDATE reservas SET qr_code = ? WHERE id = ?");
+            if (!$stmt) {
+                throw new Exception("Error preparando consulta: " . $this->conexion->error);
+            }
+
+            $stmt->bind_param("si", $qrFilename, $reserva_id);
+            if (!$stmt->execute()) {
+                throw new Exception("Error ejecutando consulta: " . $stmt->error);
+            }
+
+            return $qrFilename;
+        } catch (Exception $e) {
+            error_log("Error generando QR: " . $e->getMessage());
+            return false;
+        }
+    }
+    public function obtenerReservaPorId($reserva_id)
+    {
+        $sql = "SELECT r.*, e.codigo as espacio_codigo 
+            FROM reservas r
+            JOIN espacios e ON r.espacio_id = e.id
+            WHERE r.id = ?";
+
+        $stmt = $this->conexion->prepare($sql);
+        $stmt->bind_param("i", $reserva_id);
+        $stmt->execute();
+        return $stmt->get_result();
     }
 }
