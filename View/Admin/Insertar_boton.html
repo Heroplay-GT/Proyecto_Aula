@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Escanear QR</title>
+  <link rel="stylesheet" href="../CSS/escanear.css">
+  <script src="https://unpkg.com/html5-qrcode" defer></script>
+  <script src="../JS/escanear.js" defer></script>
+</head>
+<body>
+
+  <div class="scanner-container">
+    <button class="scan-btn" onclick="iniciarEscaneo()">Escanear QR</button>
+    <div id="reader" class="reader"></div>
+    <p id="resultado" class="resultado"></p>
+  </div>
+
+</body>
+</html>

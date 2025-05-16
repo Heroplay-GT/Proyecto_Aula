@@ -26,56 +26,62 @@ $usuario_id = $usuario['id'];
 
 $reserva = new Reserva($conexion);
 
-// AJAX para obtener espacios
+// AJAX para obtener todos los espacios (modal)
+if (isset($_GET['todos_los_espacios'])) {
+    header('Content-Type: application/json');
+
+    try {
+        $espacios = $reserva->obtenerTodosLosEspacios();
+
+        if ($espacios === false) {
+            throw new Exception('Error al consultar espacios');
+        }
+
+        $resultados = [];
+        while ($fila = $espacios->fetch_assoc()) {
+            $resultados[] = [
+                'id' => $fila['id'],
+                'codigo' => $fila['codigo'],
+                'precio_hora' => $fila['precio_hora'],
+                'tipo_vehiculo' => $fila['tipo_vehiculo'],
+                'estado' => $fila['estado']
+            ];
+        }
+
+        echo json_encode(['success' => true, 'data' => $resultados]);
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+    exit;
+}
+
+// AJAX para obtener espacios disponibles por tipo
 if (isset($_GET['tipo_vehiculo'])) {
     header('Content-Type: application/json');
 
     try {
         $tipo = $_GET['tipo_vehiculo'];
-
-        // Validar el tipo de vehículo
-        $tiposPermitidos = ['Carro', 'Moto', 'Bicicleta'];
-        if (!in_array($tipo, $tiposPermitidos)) {
-            throw new Exception('Tipo de vehículo no válido');
-        }
-
         $espacios = $reserva->obtenerEspaciosDisponibles($tipo);
 
         if ($espacios === false) {
-            throw new Exception('Error en la consulta de espacios');
+            throw new Exception('Error al consultar espacios');
         }
 
         $resultados = [];
         while ($fila = $espacios->fetch_assoc()) {
-            // Verificar que todos los campos necesarios estén presentes
-            if (!isset($fila['id'], $fila['codigo'], $fila['precio_hora'], $fila['tipo_vehiculo'])) {
-                throw new Exception('Datos incompletos en la respuesta');
-            }
-
             $resultados[] = [
-                'id' => (int)$fila['id'],
-                'codigo' => htmlspecialchars($fila['codigo']),
-                'precio_hora' => (float)$fila['precio_hora'],
-                'tipo_vehiculo' => htmlspecialchars($fila['tipo_vehiculo']),
-                'estado' => isset($fila['estado']) ? htmlspecialchars($fila['estado']) : 'Disponible'
+                'id' => $fila['id'],
+                'codigo' => $fila['codigo'],
+                'precio_hora' => $fila['precio_hora'],
+                'tipo_vehiculo' => $fila['tipo_vehiculo']
             ];
         }
 
-        echo json_encode([
-            'success' => true,
-            'data' => $resultados,
-            'count' => count($resultados) // Para debug
-        ]);
+        echo json_encode(['success' => true, 'data' => $resultados]);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage(),
-            'debug' => [
-                'tipo_recibido' => $_GET['tipo_vehiculo'] ?? 'No recibido',
-                'hora' => date('Y-m-d H:i:s')
-            ]
-        ]);
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
     exit;
 }
@@ -101,14 +107,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $placa = trim($_POST['placa'] ?? '');
     $tipo = trim($_POST['tipo_vehiculo'] ?? '');
     $modelo = trim($_POST['modelo'] ?? '');
-    $espacio_id = trim($_POST['espacio'] ?? '');
+    $espacio_id = (int)($_POST['espacio'] ?? 0);
     $contacto = trim($_POST['contacto'] ?? '');
 
     // Validaciones básicas
     $errores = [];
-    if (empty($placa)) $errores[] = "placa";
+
+    if ($tipo !== 'Bicicleta' && empty($placa)) {
+        $errores[] = "placa";
+    }
+
     if (empty($tipo)) $errores[] = "tipo_vehiculo";
-    if (empty($espacio_id)) $errores[] = "espacio";
+    if ($espacio_id <= 0) $errores[] = "espacio";
     if (empty($contacto)) $errores[] = "contacto";
 
     if (!empty($errores)) {
@@ -116,11 +126,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 
-    // Registrar ingreso
+    // Procesar bicicletas sin placa
+    if ($tipo === 'Bicicleta' && empty($placa)) {
+        $placa = 'BIC-' . strtoupper(substr(md5(uniqid()), 0, 6));
+    }
+
+    // Registrar reserva
     if ($reserva->ingresarVehiculo($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
-        header("Location: ../View/Clientes/Perfil.php?success=ingreso_ok");
+        // Obtener el ID de la reserva recién creada
+        $reserva_id = $conexion->insert_id;
+
+        // Generar código QR
+        $reserva->generarCodigoQR($reserva_id);
+
+        header("Location: ../View/Clientes/Perfil.php?success=reserva_creada&reserva_id=" . $reserva_id);
     } else {
-        header("Location: ../View/Vehiculos/formulario.php?error=db_error");
+        header("Location: ../View/Vehiculos/Formulario.php?error=reserva_error");
     }
     exit;
 }
