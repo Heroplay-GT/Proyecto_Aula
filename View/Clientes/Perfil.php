@@ -17,7 +17,7 @@ ob_start();
             <p class="welcome-message">Seleccione una opción para continuar</p>
             <div class="button-container">
                 <a class="btn" href="../Vehiculos/Formulario.php">Vehículo</a>
-                <a class="btn" href="facturacion.php">Factura</a>
+                <a class="btn" href="misReservas.php">Ver mis reservas</a>
                 <a class="btn" href="../Home.php">Salir</a>
             </div>
         </div>
