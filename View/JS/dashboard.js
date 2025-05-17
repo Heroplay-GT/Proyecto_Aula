@@ -22,4 +22,3 @@ toggle.onclick = function() {
     container.classList.toggle('active');
 }
 
-

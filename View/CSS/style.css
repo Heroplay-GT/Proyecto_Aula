@@ -355,7 +355,7 @@ button {
     color: #162938;
 }
 
-<<<<<<< HEAD
+
 /* Loader */
 .loader {
     padding: 20px;
@@ -445,7 +445,6 @@ button {
     color: #2e7d32;
     text-align: center;
 }
-=======
 .form-box.contacto {
     display: none;
     flex-direction: column;
@@ -487,4 +486,3 @@ button {
     color: #555;
 }
 
->>>>>>> c25577809b92b5d87e5da31b7b999c659ac00a3c
