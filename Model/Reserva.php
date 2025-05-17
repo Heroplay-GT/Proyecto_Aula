@@ -72,35 +72,48 @@ class Reserva
                 throw new Exception("El espacio no está disponible");
             }
 
-            // 2. Insertar en reservas
+            // 2. Insertar en reservas (primero sin QR)
             $sql = "INSERT INTO reservas 
-                (placa, tipo, modelo, espacio_id, contacto, usuarios_id, estado, fecha_reserva, qr_code) 
-                VALUES (?, ?, ?, ?, ?, ?, 'Pendiente', NOW(), '')";
-            $stmt = $this->conexion->prepare($sql);
-            if (!$stmt) {
-                throw new Exception("Error preparando consulta: " . $this->conexion->error);
-            }
+                (placa, tipo, modelo, espacio_id, contacto, usuarios_id, estado, fecha_reserva) 
+                VALUES (?, ?, ?, ?, ?, ?, 'Pendiente', NOW())";
 
+            $stmt = $this->conexion->prepare($sql);
             $stmt->bind_param("sssisi", $placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id);
+
             if (!$stmt->execute()) {
                 throw new Exception("Error ejecutando consulta: " . $stmt->error);
             }
 
-            // 3. Ocupar espacio
-            $stmtUpdate = $this->conexion->prepare("UPDATE espacios SET estado = 'Ocupado' WHERE id = ?");
-            $stmtUpdate->bind_param("i", $espacio_id);
+            // Obtener ID de la reserva recién creada
+            $reserva_id = $this->conexion->insert_id;
+
+            // 3. Generar QR con ID real
+            $qrFilename = "qr_" . $reserva_id . ".png";
+            $this->generarCodigoQR($reserva_id); // Genera el QR con el ID
+
+            // 4. Actualizar la reserva con el nombre del QR
+            $stmtUpdate = $this->conexion->prepare("UPDATE reservas SET qr_code = ? WHERE id = ?");
+            $stmtUpdate->bind_param("si", $qrFilename, $reserva_id);
             if (!$stmtUpdate->execute()) {
-                throw new Exception("Error actualizando espacio: " . $stmtUpdate->error);
+                throw new Exception("Error actualizando QR en reserva: " . $stmtUpdate->error);
+            }
+
+            // 5. Ocupar el espacio
+            $stmtOcupar = $this->conexion->prepare("UPDATE espacios SET estado = 'Ocupado' WHERE id = ?");
+            $stmtOcupar->bind_param("i", $espacio_id);
+            if (!$stmtOcupar->execute()) {
+                throw new Exception("Error ocupando espacio: " . $stmtOcupar->error);
             }
 
             $this->conexion->commit();
-            return true;
+            return $reserva_id;
         } catch (Exception $e) {
             $this->conexion->rollback();
             error_log("Error en ingresarVehiculo: " . $e->getMessage());
             return false;
         }
     }
+
 
     // Obtener vehículos activos
     public function obtenerVehiculosActivos()
@@ -165,8 +178,8 @@ class Reserva
                 throw new Exception("La librería QR Code no está instalada correctamente");
             }
 
-            // Configurar rutas
-            $qrData = "RESERVA-" . $reserva_id;
+            // Configurar rutas y datos
+            $qrData = "RESERVA-" . $reserva_id . "-" . md5(uniqid());
             $qrFilename = "qr_" . $reserva_id . ".png";
             $qrDir = __DIR__ . "/../Media/QRCodes";
             $qrPath = $qrDir . "/" . $qrFilename;
@@ -174,21 +187,22 @@ class Reserva
             // Crear directorio si no existe
             if (!file_exists($qrDir)) {
                 if (!mkdir($qrDir, 0777, true)) {
-                    throw new Exception("No se pudo crear el directorio QRCodes");
+                    throw new Exception("No se pudo crear el directorio QRCodes. Verifica permisos.");
                 }
             }
 
-            // Configuración del QR para v5.x
-            $qrCode = \Endroid\QrCode\Builder\Builder::create()
-                ->data($qrData)
-                ->size(250)
-                ->margin(10)
-                ->build();
+            // Configuración del QR - Versión 5.x
+            $qrCode = \Endroid\QrCode\QrCode::create($qrData)
+                ->setSize(300)
+                ->setMargin(10)
+                ->setErrorCorrectionLevel(\Endroid\QrCode\ErrorCorrectionLevel::High);
 
             // Guardar el QR
-            $qrCode->saveToFile($qrPath);
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
+            $result = $writer->write($qrCode);
+            $result->saveToFile($qrPath);
 
-            // Actualizar la base de datos
+            // Guardar en base de datos
             $stmt = $this->conexion->prepare("UPDATE reservas SET qr_code = ? WHERE id = ?");
             if (!$stmt) {
                 throw new Exception("Error preparando consulta: " . $this->conexion->error);
@@ -209,10 +223,10 @@ class Reserva
     public function obtenerReservasPorUsuario($usuario_id)
     {
         $sql = "SELECT r.*, e.codigo as espacio_codigo 
-            FROM reservas r
-            JOIN espacios e ON r.espacio_id = e.id
-            WHERE r.usuarios_id = ?
-            ORDER BY r.fecha_reserva DESC";
+        FROM reservas r
+        LEFT JOIN espacios e ON r.espacio_id = e.id
+        WHERE r.usuarios_id = ?
+        ORDER BY r.fecha_reserva DESC";
 
         $stmt = $this->conexion->prepare($sql);
         if (!$stmt) {
@@ -251,5 +265,35 @@ class Reserva
         }
 
         return $stmt->get_result();
+    }
+
+    public function cancelarReserva($reserva_id)
+    {
+        $this->conexion->begin_transaction();
+        try {
+            // 1. Obtener espacio_id de la reserva
+            $stmt = $this->conexion->prepare("SELECT espacio_id FROM reservas WHERE id = ?");
+            $stmt->bind_param("i", $reserva_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $reserva = $result->fetch_assoc();
+
+            // 2. Actualizar estado de la reserva
+            $stmt = $this->conexion->prepare("UPDATE reservas SET estado = 'Cancelada' WHERE id = ?");
+            $stmt->bind_param("i", $reserva_id);
+            $stmt->execute();
+
+            // 3. Liberar espacio
+            $stmt = $this->conexion->prepare("UPDATE espacios SET estado = 'Disponible' WHERE id = ?");
+            $stmt->bind_param("i", $reserva['espacio_id']);
+            $stmt->execute();
+
+            $this->conexion->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conexion->rollback();
+            error_log("Error cancelando reserva: " . $e->getMessage());
+            return false;
+        }
     }
 }

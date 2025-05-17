@@ -1,5 +1,8 @@
-?<?php
-$tieneReservas = !empty($reservas) && is_array($reservas);
+<?php
+require_once '../../Controller/ReservasController.php';
+
+// Y que $tieneReservas se calcula correctamente
+$tieneReservas = !empty($reservas);
 ?>
 
 
@@ -29,7 +32,7 @@ $tieneReservas = !empty($reservas) && is_array($reservas);
             <div class="reservas-container">
                 <?php foreach ($reservas as $reserva): ?>
                     <div class="reserva-card estado-<?= strtolower($reserva['estado']) ?>"
-                        onclick="mostrarDetalleReserva(<?= $reserva['id'] ?>)">
+                        onclick="mostrarDetalleReserva(<?= $reserva['id'] ?>, '<?= $reserva['estado'] ?>')">
                         <h3>Reserva #<?= $reserva['id'] ?></h3>
                         <p><strong>Vehículo:</strong> <?= $reserva['tipo'] ?> - <?= $reserva['modelo'] ?></p>
                         <p><strong>Estado:</strong> <span class="estado"><?= $reserva['estado'] ?></span></p>

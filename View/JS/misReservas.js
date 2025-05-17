@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('reservaModal');
     const modalContent = document.getElementById('modalContent');
 
-    // Mostrar detalles de reserva
     window.mostrarDetalleReserva = function (reservaId, estado) {
         // Verificar si la reserva está cancelada
         if (estado === 'Cancelada') {
@@ -16,11 +15,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return response.json();
             })
             .then(data => {
-                // Verificar nuevamente el estado por si acaso
-                if (data.estado === 'Cancelada') {
-                    return;
-                }
-
                 let qrSection = '';
                 let actionButton = '';
 
@@ -28,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     qrSection = `
                         <div class="qr-section">
                             <h3>Código QR</h3>
-                            <img src="../../Media/QRCodes/${data.qr_code}" alt="QR Reserva">
+                            <img src="../Media/QRCodes/${data.qr_code}" alt="QR Reserva">
                             <p class="qr-instructions">Muestra este código al ingresar al parqueadero</p>
                         </div>
                     `;
@@ -105,14 +99,14 @@ document.addEventListener('DOMContentLoaded', function () {
 // Función para cancelar reserva
 function cancelarReserva(reservaId) {
     if (confirm("¿Estás seguro de cancelar esta reserva?\nEsta acción no se puede deshacer.")) {
-        fetch(`../../Controller/ReservasController.php?action=cancelar&id=${reservaId}`)
-            .then(response => {
-                if (response.ok) {
-                    location.reload();
-                } else {
-                    alert('No se pudo cancelar la reserva. Intente nuevamente.');
-                }
-            })
+        fetch(`../../Controller/ReservasController.php?action=detalle&id=${reservaId}`)
+        .then(response => {
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('No se pudo cancelar la reserva. Intente nuevamente.');
+            }
+        })
             .catch(error => {
                 console.error('Error:', error);
                 alert('Ocurrió un error al comunicarse con el servidor');

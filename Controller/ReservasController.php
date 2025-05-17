@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once '../conexion.php';
-require_once '../Model/Reserva.php';
+require_once __DIR__ . '/../conexion.php';
+require_once __DIR__ . '/../Model/Reserva.php';
+
 
 // Verificar sesión
 if (!isset($_SESSION['username'])) {
@@ -20,19 +21,44 @@ $usuario_id = $usuario['id'];
 
 $reserva = new Reserva($conexion);
 
-// Obtener reservas del usuario
-$reservasResult = $reserva->obtenerReservasPorUsuario($usuario_id);
+// 🔹 Manejar acción: detalle
+if (isset($_GET['action']) && $_GET['action'] == 'detalle' && isset($_GET['id'])) {
+    header('Content-Type: application/json');
 
-// Procesar reservas y generar QRs si es necesario
+    $reservaData = $reserva->obtenerReservaPorId($_GET['id'])->fetch_assoc();
+
+    if ($reservaData && $reservaData['usuarios_id'] == $usuario_id) {
+        echo json_encode($reservaData);
+    } else {
+        http_response_code(403);
+        echo json_encode(['error' => 'No autorizado o reserva no encontrada']);
+    }
+    exit;
+}
+
+// 🔹 Manejar acción: cancelar
+if (isset($_GET['action']) && $_GET['action'] == 'cancelar' && isset($_GET['id'])) {
+    $reservaData = $reserva->obtenerReservaPorId($_GET['id'])->fetch_assoc();
+
+    if ($reservaData && $reservaData['usuarios_id'] == $usuario_id && $reservaData['estado'] == 'Pendiente') {
+        $reserva->cancelarReserva($_GET['id']);
+    }
+
+    header("Location: ../View/Clientes/misReservas.php");
+    exit;
+}
+
+// 🔹 Si no es acción AJAX, cargar reservas y vista
+$reservasResult = $reserva->obtenerReservasPorUsuario($usuario_id);
 $reservas = [];
+
 while ($reserva_data = $reservasResult->fetch_assoc()) {
     if ($reserva_data['estado'] == 'Pendiente' && empty($reserva_data['qr_code'])) {
         $reserva->generarCodigoQR($reserva_data['id']);
-        // Volver a obtener los datos actualizados
         $reserva_data = $reserva->obtenerReservaPorId($reserva_data['id'])->fetch_assoc();
     }
     $reservas[] = $reserva_data;
 }
 
-// Pasar a la vista
-require_once '../View/Clientes/misReservas.php';
+// Cargar vista
+require_once __DIR__ . '/../View/Clientes/misReservas.php';
