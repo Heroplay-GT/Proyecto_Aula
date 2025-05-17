@@ -1,7 +1,7 @@
-<?php
-// Verificar si hay reservas
+?<?php
 $tieneReservas = !empty($reservas) && is_array($reservas);
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
@@ -10,7 +10,8 @@ $tieneReservas = !empty($reservas) && is_array($reservas);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ParkinGO - Mis Reservas</title>
-    <link rel="stylesheet" href="../CSS/reservaciones.css">
+    <link rel="stylesheet" href="../CSS/reserva.css">
+    <link rel="stylesheet" href="../CSS/misReservas.css">
 </head>
 
 <body>
@@ -27,27 +28,33 @@ $tieneReservas = !empty($reservas) && is_array($reservas);
         <?php if ($tieneReservas): ?>
             <div class="reservas-container">
                 <?php foreach ($reservas as $reserva): ?>
-                    <div class="reserva-card <?php echo strtolower($reserva['estado']); ?>">
-                        <h3>Reserva #<?php echo $reserva['id']; ?></h3>
-                        <p><strong>Vehículo:</strong> <?php echo $reserva['tipo']; ?> - <?php echo $reserva['modelo']; ?></p>
-                        <p><strong>Placa:</strong> <?php echo $reserva['placa']; ?></p>
-                        <p><strong>Espacio:</strong> <?php echo $reserva['espacio_codigo']; ?></p>
-                        <p><strong>Estado:</strong> <?php echo $reserva['estado']; ?></p>
-                        <p><strong>Fecha:</strong> <?php echo date('d/m/Y H:i', strtotime($reserva['fecha_reserva'])); ?></p>
-
-                        <?php if (!empty($reserva['qr_code']) && $reserva['estado'] == 'Pendiente'): ?>
-                            <div class="qr-container">
-                                <img src="../../Media/QRCodes/<?php echo $reserva['qr_code']; ?>" alt="Código QR Reserva">
-                                <p>Escanea este código al ingresar al parqueadero</p>
-                            </div>
-                        <?php endif; ?>
-                    </div> <?php endforeach; ?>
+                    <div class="reserva-card estado-<?= strtolower($reserva['estado']) ?>"
+                        onclick="mostrarDetalleReserva(<?= $reserva['id'] ?>)">
+                        <h3>Reserva #<?= $reserva['id'] ?></h3>
+                        <p><strong>Vehículo:</strong> <?= $reserva['tipo'] ?> - <?= $reserva['modelo'] ?></p>
+                        <p><strong>Estado:</strong> <span class="estado"><?= $reserva['estado'] ?></span></p>
+                        <p><strong>Fecha:</strong> <?= date('d/m/Y H:i', strtotime($reserva['fecha_reserva'])) ?></p>
+                    </div>
+                <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <p class="no-reservas">No tienes reservas registradas.</p>
+            <div class="no-reservas-container">
+                <img src="../../Media/empty-state.png" alt="Sin reservas" class="empty-state-img">
+                <p class="no-reservas-message">No tienes reservas registradas</p>
+                <a href="../Vehiculos/Formulario.php" class="btn-crear-reserva">Crear nueva reserva</a>
+            </div>
         <?php endif; ?>
     </div>
 
+    <!-- Modal para detalles de reserva -->
+    <div id="reservaModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="cerrarModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="../JS/misReservas.js"></script>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 </body>

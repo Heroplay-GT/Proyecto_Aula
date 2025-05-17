@@ -45,7 +45,7 @@
                 </div>
                 <div class="remember-forgot">
                     <label><input type="checkbox" name="remember"> Recuérdame</label>
-                    <a href="recovery.php">¿Olvidaste tu contraseña?</a>
+                    <a href="Auth/recovery.php">¿Olvidaste tu contraseña?</a>
                 </div>
                 <button type="submit" class="btn">Iniciar sesión</button>
                 <div class="login-register">

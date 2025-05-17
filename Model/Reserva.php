@@ -8,6 +8,11 @@ class Reserva
         $this->conexion = $conexion;
     }
 
+    public function getConexion()
+    {
+        return $this->conexion;
+    }
+
     public function obtenerTodosLosEspacios()
     {
         $sql = "SELECT e.id, e.codigo, e.precio_hora, e.tipo_vehiculo, e.estado
@@ -152,20 +157,6 @@ class Reserva
         }
     }
 
-    public function obtenerReservasPorUsuario($usuario_id)
-    {
-        $sql = "SELECT r.*, e.codigo as espacio_codigo 
-            FROM reservas r
-            JOIN espacios e ON r.espacio_id = e.id
-            WHERE r.usuarios_id = ?
-            ORDER BY r.fecha_reserva DESC";
-
-        $stmt = $this->conexion->prepare($sql);
-        $stmt->bind_param("i", $usuario_id);
-        $stmt->execute();
-        return $stmt->get_result();
-    }
-
     public function generarCodigoQR($reserva_id)
     {
         try {
@@ -177,7 +168,7 @@ class Reserva
             // Configurar rutas
             $qrData = "RESERVA-" . $reserva_id;
             $qrFilename = "qr_" . $reserva_id . ".png";
-            $qrDir = __DIR__ . "/../../Media/QRCodes";
+            $qrDir = __DIR__ . "/../Media/QRCodes";
             $qrPath = $qrDir . "/" . $qrFilename;
 
             // Crear directorio si no existe
@@ -190,7 +181,7 @@ class Reserva
             // Configuración del QR para v5.x
             $qrCode = \Endroid\QrCode\Builder\Builder::create()
                 ->data($qrData)
-                ->size(300)
+                ->size(250)
                 ->margin(10)
                 ->build();
 
@@ -214,6 +205,31 @@ class Reserva
             return false;
         }
     }
+
+    public function obtenerReservasPorUsuario($usuario_id)
+    {
+        $sql = "SELECT r.*, e.codigo as espacio_codigo 
+            FROM reservas r
+            JOIN espacios e ON r.espacio_id = e.id
+            WHERE r.usuarios_id = ?
+            ORDER BY r.fecha_reserva DESC";
+
+        $stmt = $this->conexion->prepare($sql);
+        if (!$stmt) {
+            error_log("Error preparando consulta: " . $this->conexion->error);
+            return false;
+        }
+
+        $stmt->bind_param("i", $usuario_id);
+
+        if (!$stmt->execute()) {
+            error_log("Error ejecutando consulta: " . $stmt->error);
+            return false;
+        }
+
+        return $stmt->get_result();
+    }
+
     public function obtenerReservaPorId($reserva_id)
     {
         $sql = "SELECT r.*, e.codigo as espacio_codigo 
@@ -222,8 +238,18 @@ class Reserva
             WHERE r.id = ?";
 
         $stmt = $this->conexion->prepare($sql);
+        if (!$stmt) {
+            error_log("Error preparando consulta: " . $this->conexion->error);
+            return false;
+        }
+
         $stmt->bind_param("i", $reserva_id);
-        $stmt->execute();
+
+        if (!$stmt->execute()) {
+            error_log("Error ejecutando consulta: " . $stmt->error);
+            return false;
+        }
+
         return $stmt->get_result();
     }
 }

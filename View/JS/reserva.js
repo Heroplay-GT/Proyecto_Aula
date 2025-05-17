@@ -11,8 +11,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const placaInput = document.querySelector('input[name="placa"]');
     const reservaForm = document.getElementById("reservaForm");
 
+    // URL base corregida
+    const baseUrl = window.location.origin + '/Proyecto_Aula';
+
     // Event Listeners
-    tipoVehiculo.addEventListener("change", function () {
+    tipoVehiculo.addEventListener("change", function() {
         actualizarRequerimientoPlaca();
         cargarEspaciosDisponibles();
     });
@@ -22,24 +25,13 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal.addEventListener("click", cerrarModal);
     filtroTipo.addEventListener("change", cargarEspaciosModal);
 
-    // Cerrar modal haciendo clic fuera del contenido
-    window.addEventListener("click", (e) => {
-        if (e.target === modal) cerrarModal();
-    });
+    window.addEventListener("click", (e) => e.target === modal && cerrarModal());
 
-    // Función para actualizar requerimiento de placa
+    // Funciones principales
     function actualizarRequerimientoPlaca() {
-        if (tipoVehiculo.value === 'Bicicleta') {
-            placaInput.removeAttribute('required');
-            placaInput.placeholder = 'Opcional (ej: ABC123)';
-        } else {
-            placaInput.setAttribute('required', '');
-            placaInput.placeholder = '';
-        }
-    }
-
-    function cerrarModal() {
-        modal.style.display = "none";
+        const isBicicleta = tipoVehiculo.value === 'Bicicleta';
+        placaInput.toggleAttribute('required', !isBicicleta);
+        placaInput.placeholder = isBicicleta ? 'Opcional (ej: ABC123)' : '';
     }
 
     function mostrarModalEspacios() {
@@ -47,32 +39,43 @@ document.addEventListener("DOMContentLoaded", () => {
         cargarEspaciosModal();
     }
 
-    function cargarEspaciosModal() {
+    function cerrarModal() {
+        modal.style.display = "none";
+    }
+
+    async function cargarEspaciosModal() {
         const tipo = filtroTipo.value;
         contenidoEspacios.innerHTML = '<p class="loading">Cargando espacios...</p>';
 
-        fetch(`../../Controller/ReservaController.php?todos_los_espacios=1&tipo=${tipo === 'all' ? '' : tipo}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) throw new Error(data.error);
-                contenidoEspacios.innerHTML = data.data.length > 0
-                    ? generarCardsEspacios(data.data)
-                    : '<p class="no-espacios">No hay espacios disponibles</p>';
-                agregarEventosCards();
-            })
-            .catch(err => {
-                console.error("Error:", err);
-                contenidoEspacios.innerHTML = `<p class="error">Error al cargar espacios: ${err.message}</p>`;
-            });
+        try {
+            const url = `${baseUrl}/Controller/ReservaController.php?todos_los_espacios=1${tipo !== 'all' ? `&tipo=${tipo}` : ''}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            
+            const data = await response.json();
+            
+            if (!data.success) throw new Error(data.error || "Error en los datos recibidos");
+            
+            contenidoEspacios.innerHTML = data.data.length > 0 
+                ? generarCardsEspacios(data.data) 
+                : '<p class="no-espacios">No hay espacios disponibles</p>';
+            
+            agregarEventosCards();
+        } catch (error) {
+            console.error("Error:", error);
+            contenidoEspacios.innerHTML = `
+                <div class="error">
+                    <p>Error al cargar espacios</p>
+                    <p><small>${error.message}</small></p>
+                    <button onclick="cargarEspaciosModal()">Reintentar</button>
+                </div>`;
+        }
     }
 
     function generarCardsEspacios(espacios) {
-        return espacios.map(espacio => {
-            let claseEstado = espacio.estado.toLowerCase();
-            let textoEstado = espacio.estado;
-
-            return `
-            <div class="espacio-card ${claseEstado}" 
+        return espacios.map(espacio => `
+            <div class="espacio-card ${espacio.estado.toLowerCase()}" 
                  data-id="${espacio.id}" 
                  data-codigo="${espacio.codigo}" 
                  data-precio="${espacio.precio_hora}"
@@ -80,91 +83,86 @@ document.addEventListener("DOMContentLoaded", () => {
                  data-estado="${espacio.estado}">
                 <h3>${espacio.codigo}</h3>
                 <p><strong>Tipo:</strong> ${espacio.tipo_vehiculo}</p>
-                <p><strong>Estado:</strong> ${textoEstado}</p>
+                <p><strong>Estado:</strong> ${espacio.estado}</p>
                 <p><strong>Precio:</strong> $${espacio.precio_hora.toLocaleString('es-CO')}/h</p>
             </div>
-            `;
-        }).join('');
+        `).join('');
     }
 
-    function cargarEspaciosDisponibles() {
+    async function cargarEspaciosDisponibles() {
         const tipo = tipoVehiculo.value;
         if (!tipo) {
-            selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione tipo primero</option>';
-            selectEspacio.disabled = true;
-            precioInput.value = "";
+            resetSelectEspacio();
             return;
         }
 
-        selectEspacio.innerHTML = '<option value="" disabled selected hidden>Cargando espacios...</option>';
+        resetSelectEspacio('Cargando espacios...');
+        
+        try {
+            const response = await fetch(`${baseUrl}/Controller/ReservaController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`);
+            const data = await response.json();
+            
+            if (data.error) throw new Error(data.error);
+            
+            selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione espacio</option>';
+            
+            if (data.data?.length > 0) {
+                data.data.forEach(espacio => {
+                    const option = new Option(espacio.codigo, espacio.id);
+                    option.dataset.precio = espacio.precio_hora;
+                    selectEspacio.add(option);
+                });
+                selectEspacio.disabled = false;
+                if (data.data[0].precio_hora) {
+                    precioInput.value = `$${data.data[0].precio_hora.toLocaleString('es-CO')}/hora`;
+                }
+            } else {
+                resetSelectEspacio('No hay espacios disponibles');
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            resetSelectEspacio('Error al cargar');
+        }
+    }
+
+    function resetSelectEspacio(text = 'Seleccione tipo primero') {
+        selectEspacio.innerHTML = `<option value="" disabled selected hidden>${text}</option>`;
         selectEspacio.disabled = true;
         precioInput.value = "";
-
-        fetch(`../../Controller/ReservaController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) throw new Error(data.error);
-
-                selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione espacio</option>';
-
-                if (data.data && data.data.length > 0) {
-                    // Mostrar el precio del primer espacio disponible como referencia
-                    if (data.data[0].precio_hora) {
-                        precioInput.value = `$${data.data[0].precio_hora.toLocaleString('es-CO')}/hora`;
-                    }
-
-                    data.data.forEach(espacio => {
-                        const option = new Option(
-                            `${espacio.codigo}`,
-                            espacio.id
-                        );
-                        option.dataset.precio = espacio.precio_hora;
-                        selectEspacio.add(option);
-                    });
-                    selectEspacio.disabled = false;
-                } else {
-                    selectEspacio.innerHTML = '<option value="" disabled selected hidden>No hay espacios disponibles</option>';
-                }
-            })
-            .catch(err => console.error("Error:", err));
     }
 
     function agregarEventosCards() {
         document.querySelectorAll('.espacio-card').forEach(card => {
-            card.addEventListener('click', function () {
-                if (this.dataset.estado === 'Disponible') {
-                    // Actualizar tipo de vehículo si es diferente
-                    if (tipoVehiculo.value !== this.dataset.tipo) {
-                        tipoVehiculo.value = this.dataset.tipo;
-                        actualizarRequerimientoPlaca();
-                    }
-
-                    // Seleccionar el espacio
-                    selectEspacio.innerHTML = '';
-                    const option = new Option(
-                        `${this.dataset.codigo}`,
-                        this.dataset.id
-                    );
-                    option.dataset.precio = this.dataset.precio;
-                    selectEspacio.add(option);
-                    selectEspacio.value = this.dataset.id;
-                    selectEspacio.disabled = false;
-
-                    // Actualizar precio
-                    precioInput.value = `$${parseFloat(this.dataset.precio).toLocaleString('es-CO')}/hora`;
-
-                    // Cerrar modal
-                    cerrarModal();
-                } else {
+            card.addEventListener('click', function() {
+                if (this.dataset.estado !== 'Disponible') {
                     mostrarMensaje('error', 'Solo puedes seleccionar espacios disponibles');
+                    return;
                 }
+
+                // Actualizar tipo de vehículo si es diferente
+                if (tipoVehiculo.value !== this.dataset.tipo) {
+                    tipoVehiculo.value = this.dataset.tipo;
+                    actualizarRequerimientoPlaca();
+                }
+
+                // Actualizar select de espacios
+                selectEspacio.innerHTML = '';
+                const option = new Option(this.dataset.codigo, this.dataset.id);
+                option.dataset.precio = this.dataset.precio;
+                selectEspacio.add(option);
+                selectEspacio.value = this.dataset.id;
+                selectEspacio.disabled = false;
+
+                // Actualizar precio
+                precioInput.value = `$${parseFloat(this.dataset.precio).toLocaleString('es-CO')}/hora`;
+                cerrarModal();
             });
         });
     }
 
     function actualizarPrecio() {
         const selectedOption = selectEspacio.options[selectEspacio.selectedIndex];
-        if (selectedOption && selectedOption.dataset.precio) {
+        if (selectedOption?.dataset.precio) {
             precioInput.value = `$${parseFloat(selectedOption.dataset.precio).toLocaleString('es-CO')}/hora`;
         }
     }
@@ -178,12 +176,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Inicializar requerimiento de placa al cargar
-    actualizarRequerimientoPlaca();
-
-    // Añadir al final del reserva.js
-    reservaForm.addEventListener("submit", function (e) {
-        // Validar que se haya seleccionado un espacio
+    // Validación del formulario
+    reservaForm.addEventListener("submit", function(e) {
         if (!selectEspacio.value || selectEspacio.disabled) {
             e.preventDefault();
             mostrarMensaje('error', 'Debe seleccionar un espacio válido');
@@ -191,20 +185,18 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        // Validar placa solo si no es bicicleta
-        if (tipoVehiculo.value !== 'Bicicleta') {
-            const placa = placaInput.value.trim();
-            if (!placa) {
-                e.preventDefault();
-                mostrarMensaje('error', 'La placa es requerida para este tipo de vehículo');
-                placaInput.focus();
-                return;
-            }
+        if (tipoVehiculo.value !== 'Bicicleta' && !placaInput.value.trim()) {
+            e.preventDefault();
+            mostrarMensaje('error', 'La placa es requerida para este tipo de vehículo');
+            placaInput.focus();
+            return;
         }
 
-        // Si es bicicleta y no tiene placa, asignar valor por defecto
         if (tipoVehiculo.value === 'Bicicleta' && !placaInput.value.trim()) {
             placaInput.value = 'BIC-' + Math.random().toString(36).substr(2, 6).toUpperCase();
         }
     });
+
+    // Inicialización
+    actualizarRequerimientoPlaca();
 });

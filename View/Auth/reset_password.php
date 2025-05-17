@@ -13,7 +13,7 @@ $token = $_GET['token'] ?? '';
 <body>
     <div class="wrapper">
         <h2>Nueva Contraseña</h2>
-        <form action="../Controller/update_password.php" method="POST">
+        <form action="../../Controller/update_password.php" method="POST">
             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
             <div class="input-box">
                 <label>Nueva Contraseña:</label>

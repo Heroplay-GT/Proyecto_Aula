@@ -8,7 +8,7 @@
 <body>
     <div class="wrapper">
         <h2>Recuperar Contraseña</h2>
-        <form action="../Controller/send_recovery.php" method="POST">
+        <form action="../../Controller/send_recovery.php" method="POST">
             <div class="input-box">
                 <label>Ingresa tu correo:</label>
                 <input type="email" name="email" required>
