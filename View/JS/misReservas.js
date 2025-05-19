@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     qrSection = `
                         <div class="qr-section">
                             <h3>Código QR</h3>
-                            <img src="../Media/QRCodes/${data.qr_code}" alt="QR Reserva">
+                            <img src="../../Media/QRCodes/${data.qr_code}" alt="QR Reserva">
                             <p class="qr-instructions">Muestra este código al ingresar al parqueadero</p>
                         </div>
                     `;

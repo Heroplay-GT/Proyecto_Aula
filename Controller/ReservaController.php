@@ -2,6 +2,9 @@
 session_start();
 require_once '../conexion.php';
 require_once '../Model/Reserva.php';
+require_once '../vendor/autoload.php'; // para usar Endroid\QrCode
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 // Verificar sesión
 if (!isset($_SESSION['username'])) {
@@ -135,10 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($reserva->ingresarVehiculo($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
         // Obtener el ID de la reserva recién creada
         $reserva_id = $conexion->insert_id;
-
-        // Generar código QR
-        $reserva->generarCodigoQR($reserva_id);
-
+        
         header("Location: ../View/Clientes/Perfil.php?success=reserva_creada&reserva_id=" . $reserva_id);
     } else {
         header("Location: ../View/Vehiculos/Formulario.php?error=reserva_error");

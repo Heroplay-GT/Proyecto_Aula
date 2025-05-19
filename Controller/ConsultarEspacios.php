@@ -43,7 +43,6 @@ try {
     http_response_code(500);
     echo json_encode([
         'error' => $e->getMessage(),
-        'trace' => $e->getTrace() // Solo para desarrollo, quitar en producción
     ]);
 } finally {
     if (isset($stmt)) $stmt->close();
