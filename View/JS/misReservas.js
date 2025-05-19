@@ -99,14 +99,14 @@ document.addEventListener('DOMContentLoaded', function () {
 // Función para cancelar reserva
 function cancelarReserva(reservaId) {
     if (confirm("¿Estás seguro de cancelar esta reserva?\nEsta acción no se puede deshacer.")) {
-        fetch(`../../Controller/ReservasController.php?action=detalle&id=${reservaId}`)
-        .then(response => {
-            if (response.ok) {
-                location.reload();
-            } else {
-                alert('No se pudo cancelar la reserva. Intente nuevamente.');
-            }
-        })
+        fetch(`../../Controller/ReservasController.php?action=cancelar&id=${reservaId}`)
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('No se pudo cancelar la reserva. Intente nuevamente.');
+                }
+            })
             .catch(error => {
                 console.error('Error:', error);
                 alert('Ocurrió un error al comunicarse con el servidor');
