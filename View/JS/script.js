@@ -100,5 +100,3 @@ closeContactIcon.addEventListener('click', () => {
     wrapper.classList.remove('active-popup');
     contactForm.style.display = 'none';
 });
-
-

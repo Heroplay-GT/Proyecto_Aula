@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=poppins:wght@300;400;500;600;700;800;900&display=swap');
 
-*{
-    margin:0;
+* {
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
 }
 
-body{
+body {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -17,7 +17,7 @@ body{
     background-position: center;
 }
 
-header{
+header {
     position: fixed;
     top: 0;
     left: 0;
@@ -29,22 +29,22 @@ header{
     z-index: 99;
 }
 
-.logo{
+.logo {
     font-size: 2m;
     color: #162938;
     user-select: none;
 }
 
-.navigation a{
+.navigation a {
     position: relative;
     font-size: 1.1em;
     color: #162938;
     text-decoration: none;
     font-weight: 500;
-    margin-left: 40px; 
+    margin-left: 40px;
 }
 
-.navigation a::after{
+.navigation a::after {
     content: '';
     position: absolute;
     left: 0;
@@ -58,12 +58,12 @@ header{
     transition: transform .5s;
 }
 
-.navigation a:hover::after{
+.navigation a:hover::after {
     transform: scaleX(1);
     transform-origin: left;
 }
 
-.navigation .btnLogin-popup{
+.navigation .btnLogin-popup {
     width: 130px;
     height: 50px;
     background: transparent;
@@ -78,12 +78,12 @@ header{
     transition: .5s;
 }
 
-.navigation .btnLogin-popup:hover{
+.navigation .btnLogin-popup:hover {
     background: grey;
     color: #162938;
 }
 
-.wrapper{
+.wrapper {
     position: relative;
     width: 400px;
     height: 440px;
@@ -100,41 +100,41 @@ header{
     transition: transform .5s ease, height .2s ease;
 }
 
-.wrapper.active-popup{
+.wrapper.active-popup {
     transform: scale(1);
 }
 
-.wrapper.active{
+.wrapper.active {
     height: 520px;
 }
 
-.wrapper .form-box{
+.wrapper .form-box {
     width: 100%;
     padding: 40px;
 }
 
-.wrapper .form-box.login{
+.wrapper .form-box.login {
     transition: transform .18s ease;
     transform: translateX(0px);
 }
 
-.wrapper.active .form-box.login{
+.wrapper.active .form-box.login {
     transition: none;
     transform: translateX(-400px);
 }
 
-.wrapper .form-box.register{
+.wrapper .form-box.register {
     position: absolute;
     transition: none;
     transform: translateX(400px);
 }
 
-.wrapper.active .form-box.register{
+.wrapper.active .form-box.register {
     transition: transform .18s ease;
     transform: translateX(0px);
 }
 
-.wrapper .icon-close{
+.wrapper .icon-close {
     position: absolute;
     top: 0;
     right: 0;
@@ -151,13 +151,13 @@ header{
     z-index: 1;
 }
 
-.form-box h2{
+.form-box h2 {
     font-size: 2em;
     color: #162938;
     text-align: center;
 }
 
-.input-box{
+.input-box {
     position: relative;
     width: 100%;
     height: 50px;
@@ -165,7 +165,7 @@ header{
     margin: 30px 0;
 }
 
-.input-box label{
+.input-box label {
     position: absolute;
     top: 50%;
     left: 5px;
@@ -177,12 +177,12 @@ header{
     transition: .5s;
 }
 
-.input-box input:focus ~ label,
-.input-box input:valid ~ label{
+.input-box input:focus~label,
+.input-box input:valid~label {
     top: -5px;
 }
 
-.input-box input{
+.input-box input {
     width: 100%;
     height: 100%;
     background: transparent;
@@ -194,7 +194,7 @@ header{
     padding: 0 35px 0 5px;
 }
 
-.input-box .icon{
+.input-box .icon {
     position: absolute;
     right: 8px;
     font-size: 1.2em;
@@ -202,26 +202,26 @@ header{
     line-height: 57px;
 }
 
-.remember-forgot{
+.remember-forgot {
     font-size: .9em;
     color: #162938;
     font-weight: 500;
-    margin: -15px 0 15px 0;
+    margin: -10px 0 25px 0;
     display: flex;
     justify-content: space-between;
 }
 
-.remember-forgot label input{
+.remember-forgot label input {
     accent-color: #162938;
     margin-right: 3px;
 }
 
-.remember-forgot a{
+.remember-forgot a {
     color: #162938;
     text-decoration: none;
 }
 
-.remember-forgot a:hover{
+.remember-forgot a:hover {
     text-decoration: underline;
 }
 
@@ -242,7 +242,7 @@ header{
     text-decoration: none;
 }
 
-.login-register{
+.login-register {
     font-size: .9em;
     color: #162938;
     text-align: center;
@@ -250,13 +250,13 @@ header{
     margin: 25px 0 10px;
 }
 
-.login-register p a{
+.login-register p a {
     color: #162938;
     text-decoration: none;
     font-weight: 600;
 }
 
-.login-register p a:hover{
+.login-register p a:hover {
     text-decoration: underline;
 }
 
@@ -285,10 +285,11 @@ h1 {
 
 label {
     display: block;
-    margin-top: 10px;
+    margin-top: 0px;
 }
 
-input[type="text"], select {
+input[type="text"],
+select {
     width: 100%;
     padding: 8px;
     margin-top: 5px;
@@ -297,7 +298,7 @@ input[type="text"], select {
 button {
     margin-top: 20px;
     width: 100%;
-    padding: 10px;
+    padding: 0px;
     background-color: #007BFF;
     color: white;
     border: none;
@@ -364,13 +365,15 @@ button {
 }
 
 /* Mensajes de error/éxito */
-.error-msg, .no-espacios {
+.error-msg,
+.no-espacios {
     text-align: center;
     padding: 20px;
     color: #d32f2f;
 }
 
-.error-msg ion-icon, .no-espacios ion-icon {
+.error-msg ion-icon,
+.no-espacios ion-icon {
     font-size: 48px;
     margin-bottom: 10px;
 }
@@ -445,22 +448,27 @@ button {
     color: #2e7d32;
     text-align: center;
 }
+
 .form-box.contacto {
     display: none;
     flex-direction: column;
     align-items: center;
     padding: 30px;
-    background: #ffffff; /* Fondo blanco sólido */
+    background: #ffffff;
+    /* Fondo blanco sólido */
     border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); /* Sombra más pro */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    /* Sombra más pro */
     position: relative;
     z-index: 2;
     width: 100%;
     max-width: 380px;
     text-align: center;
 }
+
 .form-box.contacto .btn {
-    background-color: #25D366; /* color verde WhatsApp */
+    background-color: #25D366;
+    /* color verde WhatsApp */
     color: #fff;
     font-weight: bold;
     padding: 12px 24px;
@@ -474,6 +482,7 @@ button {
 .form-box.contacto .btn:hover {
     background-color: #1ebe5d;
 }
+
 .form-box.contacto h2 {
     font-size: 26px;
     font-weight: 700;
@@ -485,4 +494,3 @@ button {
     font-size: 15px;
     color: #555;
 }
-
