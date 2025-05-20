@@ -6,7 +6,13 @@ require_once __DIR__ . '/../Model/Reserva.php';
 
 // Verificar sesión
 if (!isset($_SESSION['username'])) {
-    header("Location: ../View/Home.php");
+    echo "<h3 style='color:green;'>Por favor, ingrese sesion.
+            <br>Redirigiendo...</h3>";
+    echo "<script>
+            setTimeout(() => {
+                window.location.href = '../Home.php';
+            }, 2000);
+        </script>";
     exit;
 }
 

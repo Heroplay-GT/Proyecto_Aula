@@ -8,7 +8,7 @@ use Endroid\QrCode\Writer\PngWriter;
 
 // Verificar sesión
 if (!isset($_SESSION['username'])) {
-    header("Location: ../View/Home.php");
+    header("Location: /PROYECTO_AULA/View/Home.php");
     exit;
 }
 
