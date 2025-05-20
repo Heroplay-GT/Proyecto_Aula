@@ -215,7 +215,7 @@ class Reserva
         }
 
         // Construir el texto para el QR
-        $qrData = "RESERVA #" . $reserva['id'] . "\n";
+        $qrData = "http://localhost/PROYECTO_AULA//Controller/activar_reserva.php?id=" . $reserva_id . "\n";
         $qrData .= "Placa: " . $reserva['placa'] . "\n";
         $qrData .= "Tipo: " . $reserva['tipo'] . "\n";
         $qrData .= "Modelo: " . $reserva['modelo'] . "\n";

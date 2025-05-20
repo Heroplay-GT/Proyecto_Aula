@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const baseUrl = window.location.origin + '/Proyecto_Aula';
 
     // Event Listeners
-    tipoVehiculo.addEventListener("change", function() {
+    tipoVehiculo.addEventListener("change", function () {
         actualizarRequerimientoPlaca();
         cargarEspaciosDisponibles();
     });
@@ -50,17 +50,17 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const url = `${baseUrl}/Controller/ReservaController.php?todos_los_espacios=1${tipo !== 'all' ? `&tipo=${tipo}` : ''}`;
             const response = await fetch(url);
-            
+
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-            
+
             const data = await response.json();
-            
+
             if (!data.success) throw new Error(data.error || "Error en los datos recibidos");
-            
-            contenidoEspacios.innerHTML = data.data.length > 0 
-                ? generarCardsEspacios(data.data) 
+
+            contenidoEspacios.innerHTML = data.data.length > 0
+                ? generarCardsEspacios(data.data)
                 : '<p class="no-espacios">No hay espacios disponibles</p>';
-            
+
             agregarEventosCards();
         } catch (error) {
             console.error("Error:", error);
@@ -97,15 +97,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         resetSelectEspacio('Cargando espacios...');
-        
+
         try {
             const response = await fetch(`${baseUrl}/Controller/ReservaController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`);
             const data = await response.json();
-            
+
             if (data.error) throw new Error(data.error);
-            
+
             selectEspacio.innerHTML = '<option value="" disabled selected hidden>Seleccione espacio</option>';
-            
+
             if (data.data?.length > 0) {
                 data.data.forEach(espacio => {
                     const option = new Option(espacio.codigo, espacio.id);
@@ -114,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
                 selectEspacio.disabled = false;
                 if (data.data[0].precio_hora) {
-                    precioInput.value = `$${data.data[0].precio_hora.toLocaleString('es-CO')}/hora`;
+                    precioInput.value = `$${parseInt(data.data[0].precio_hora).toLocaleString('es-CO')}/Hora`;
                 }
             } else {
                 resetSelectEspacio('No hay espacios disponibles');
@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function agregarEventosCards() {
         document.querySelectorAll('.espacio-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function () {
                 if (this.dataset.estado !== 'Disponible') {
                     mostrarMensaje('error', 'Solo puedes seleccionar espacios disponibles');
                     return;
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectEspacio.disabled = false;
 
                 // Actualizar precio
-                precioInput.value = `$${parseFloat(this.dataset.precio).toLocaleString('es-CO')}/hora`;
+                precioInput.value = `$${parseFloat(this.dataset.precio).toLocaleString('es-CO')}/Hora`;
                 cerrarModal();
             });
         });
@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function actualizarPrecio() {
         const selectedOption = selectEspacio.options[selectEspacio.selectedIndex];
         if (selectedOption?.dataset.precio) {
-            precioInput.value = `$${parseFloat(selectedOption.dataset.precio).toLocaleString('es-CO')}/hora`;
+            precioInput.value = `$${parseFloat(selectedOption.dataset.precio).toLocaleString('es-CO')}/Hora`;
         }
     }
 
@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Validación del formulario
-    reservaForm.addEventListener("submit", function(e) {
+    reservaForm.addEventListener("submit", function (e) {
         if (!selectEspacio.value || selectEspacio.disabled) {
             e.preventDefault();
             mostrarMensaje('error', 'Debe seleccionar un espacio válido');
