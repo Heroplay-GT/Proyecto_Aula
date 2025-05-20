@@ -87,16 +87,16 @@
             </form>
         </div>
 
-        <!--Formulario de contacto-->
-<div class="form-box contacto">
-    <h2>Contáctame</h2>
-    <p style="text-align: center; margin-bottom: 20px;">¿Tienes dudas? Escríbeme por WhatsApp</p>
-    <div class="input-box" style="justify-content: center;">
-        <span class="icon"><ion-icon name="logo-whatsapp"></ion-icon></span>
-        <a class="btn" style="text-align: center;" target="_blank"
-            href="https://wa.me/573009048312">Enviar mensaje</a>
-    </div>
-</div>
+        <!-- contacto -->
+        <div class="form-box contacto">
+            <h2>Contáctame</h2>
+            <p style="text-align: center; margin-bottom: 20px;">¿Tienes dudas? Escríbeme por WhatsApp</p>
+            <div class="input-box" style="justify-content: center;">
+                <span class="icon"><ion-icon name="logo-whatsapp"></ion-icon></span>
+                <a class="btn" style="text-align: center;" target="_blank"
+                    href="https://wa.me/573009048312">Enviar mensaje</a>
+            </div>
+        </div>
 
     </div>
 
@@ -104,6 +104,12 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
+
+    <footer>
+
+        <p>© 2025 ParkinGo. Todos los derechos reservados.</p>
+
+    </footer>
 </body>
 
 </html>
