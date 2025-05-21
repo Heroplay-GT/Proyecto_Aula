@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $_SESSION['username'] = $fila['username'];
 
             // Redirigir según el rol
-            if ($fila['username'] === '01xhero') {
+            if ($fila['username'] === 'admin') {
                 echo "<script>alert('Bienvenido administrador'); window.location.href='../View/Admin/Dashboard.html';</script>";
             } else {
                 echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/Clientes/Perfil.php';</script>";
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $_SESSION['id'] = $fila['id']; // <- AGREGA ESTA LÍNEA
     
         // Redirigir según el rol
-        if ($fila['username'] === '01xhero') {
+        if ($fila['username'] === 'admin') {
             echo "<script>alert('Bienvenido administrador'); window.location.href='../View/Admin/Dashboard.html';</script>";
         } else {
             echo "<script>alert('Inicio de sesión exitoso'); window.location.href='../View/Clientes/Perfil.php';</script>";

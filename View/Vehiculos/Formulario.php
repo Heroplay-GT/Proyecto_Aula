@@ -119,3 +119,7 @@
 </body>
 
 </html>
+
+<?php if (isset($_GET['error']) && $_GET['error'] === 'placa_duplicada'): ?>
+    <div class="error-message">Ya existe una reserva pendiente o activa con esta placa.</div>
+<?php endif; ?>

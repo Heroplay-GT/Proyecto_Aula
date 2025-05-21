@@ -127,6 +127,19 @@ class Reserva
                 throw new Exception("El espacio no está disponible");
             }
 
+            // Verificar si ya existe una reserva activa o pendiente para esa placa
+            $stmtCheckPlaca = $this->conexion->prepare("
+                SELECT id FROM reservas 
+                WHERE placa = ? AND estado IN ('Pendiente', 'Activo')
+            ");
+            $stmtCheckPlaca->bind_param("s", $placa);
+            $stmtCheckPlaca->execute();
+            $resultCheckPlaca = $stmtCheckPlaca->get_result();
+
+            if ($resultCheckPlaca->num_rows > 0) {
+                throw new Exception("Ya existe una reserva activa o pendiente con esta placa.");
+            }
+
             $sql = "INSERT INTO reservas 
                     (placa, tipo, modelo, espacio_id, contacto, usuarios_id, estado, fecha_reserva) 
                     VALUES (?, ?, ?, ?, ?, ?, 'Pendiente', NOW())";
@@ -190,72 +203,150 @@ class Reserva
 
     // ========== QR GENERATOR ==========
     public function generarCodigoQR($reserva_id)
-{
-    try {
-        // Verificar que la librería está disponible
-        if (!class_exists('Endroid\QrCode\Builder\Builder')) {
-            throw new Exception("La librería QR Code no está instalada correctamente");
-        }
+    {
+        try {
+            // Verificar que la librería está disponible
+            if (!class_exists('Endroid\QrCode\Builder\Builder')) {
+                throw new Exception("La librería QR Code no está instalada correctamente");
+            }
 
-        // Obtener datos de la reserva
-        $stmt = $this->conexion->prepare("
+            // Obtener datos de la reserva
+            $stmt = $this->conexion->prepare("
             SELECT r.id, r.placa, r.tipo, r.modelo, r.contacto, r.fecha_reserva, r.estado, e.codigo AS espacio_codigo
             FROM reservas r
             JOIN espacios e ON r.espacio_id = e.id
             WHERE r.id = ?
         ");
-        $stmt->bind_param("i", $reserva_id);
-        if (!$stmt->execute()) {
-            throw new Exception("Error consultando reserva: " . $stmt->error);
-        }
-
-        $reserva = $stmt->get_result()->fetch_assoc();
-        if (!$reserva) {
-            throw new Exception("Reserva no encontrada");
-        }
-
-        // Construir el texto para el QR
-        $qrData = "http://localhost/PROYECTO_AULA//Controller/activar_reserva.php?id=" . $reserva_id . "\n";
-        $qrData .= "Placa: " . $reserva['placa'] . "\n";
-        $qrData .= "Tipo: " . $reserva['tipo'] . "\n";
-        $qrData .= "Modelo: " . $reserva['modelo'] . "\n";
-        $qrData .= "Espacio: " . $reserva['espacio_codigo'] . "\n";
-        $qrData .= "Contacto: " . $reserva['contacto'] . "\n";
-        $qrData .= "Fecha: " . $reserva['fecha_reserva'] . "\n";
-        $qrData .= "Estado: " . $reserva['estado'];
-
-        // Configurar rutas
-        $qrFilename = "qr_" . $reserva_id . ".png";
-        $qrDir = __DIR__ . "/../Media/QRCodes";
-        $qrPath = $qrDir . "/" . $qrFilename;
-
-        if (!file_exists($qrDir)) {
-            if (!mkdir($qrDir, 0777, true)) {
-                throw new Exception("No se pudo crear el directorio QRCodes");
+            $stmt->bind_param("i", $reserva_id);
+            if (!$stmt->execute()) {
+                throw new Exception("Error consultando reserva: " . $stmt->error);
             }
+
+            $reserva = $stmt->get_result()->fetch_assoc();
+            if (!$reserva) {
+                throw new Exception("Reserva no encontrada");
+            }
+
+            // Construir el texto para el QR
+            $qrData = "http://localhost/PROYECTO_AULA//Controller/activar_reserva.php?id=" . $reserva_id . "\n";
+            $qrData .= "Placa: " . $reserva['placa'] . "\n";
+            $qrData .= "Tipo: " . $reserva['tipo'] . "\n";
+            $qrData .= "Modelo: " . $reserva['modelo'] . "\n";
+            $qrData .= "Espacio: " . $reserva['espacio_codigo'] . "\n";
+            $qrData .= "Contacto: " . $reserva['contacto'] . "\n";
+            $qrData .= "Fecha: " . $reserva['fecha_reserva'] . "\n";
+            $qrData .= "Estado: " . $reserva['estado'];
+
+            // Configurar rutas
+            $qrFilename = "qr_" . $reserva_id . ".png";
+            $qrDir = __DIR__ . "/../Media/QRCodes";
+            $qrPath = $qrDir . "/" . $qrFilename;
+
+            if (!file_exists($qrDir)) {
+                if (!mkdir($qrDir, 0777, true)) {
+                    throw new Exception("No se pudo crear el directorio QRCodes");
+                }
+            }
+
+            // Generar QR
+            $qrCode = \Endroid\QrCode\Builder\Builder::create()
+                ->data($qrData)
+                ->size(200)
+                ->margin(10)
+                ->build();
+
+            $qrCode->saveToFile($qrPath);
+
+            // Guardar nombre del archivo en la base de datos
+            $stmtUpdate = $this->conexion->prepare("UPDATE reservas SET qr_code = ? WHERE id = ?");
+            $stmtUpdate->bind_param("si", $qrFilename, $reserva_id);
+            if (!$stmtUpdate->execute()) {
+                throw new Exception("Error guardando QR: " . $stmtUpdate->error);
+            }
+
+            return $qrFilename;
+        } catch (Exception $e) {
+            error_log("Error generando QR con información: " . $e->getMessage());
+            return false;
         }
-
-        // Generar QR
-        $qrCode = \Endroid\QrCode\Builder\Builder::create()
-            ->data($qrData)
-            ->size(200)
-            ->margin(10)
-            ->build();
-
-        $qrCode->saveToFile($qrPath);
-
-        // Guardar nombre del archivo en la base de datos
-        $stmtUpdate = $this->conexion->prepare("UPDATE reservas SET qr_code = ? WHERE id = ?");
-        $stmtUpdate->bind_param("si", $qrFilename, $reserva_id);
-        if (!$stmtUpdate->execute()) {
-            throw new Exception("Error guardando QR: " . $stmtUpdate->error);
-        }
-
-        return $qrFilename;
-    } catch (Exception $e) {
-        error_log("Error generando QR con información: " . $e->getMessage());
-        return false;
     }
-}
 
+    public function ingresarVehiculoDesdeAdmin($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)
+    {
+        $this->conexion->begin_transaction();
+        try {
+            // Validar espacio disponible
+            $stmt = $this->conexion->prepare("SELECT estado FROM espacios WHERE id = ?");
+            $stmt->bind_param("i", $espacio_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                throw new Exception("El espacio no existe");
+            }
+
+            $espacio = $result->fetch_assoc();
+            if ($espacio['estado'] !== 'Disponible') {
+                throw new Exception("El espacio no está disponible");
+            }
+
+            // Verificar placa activa
+            $stmtCheck = $this->conexion->prepare("
+            SELECT id FROM v_ingresados WHERE placa = ? AND estado = 'Activo'
+        ");
+            $stmtCheck->bind_param("s", $placa);
+            $stmtCheck->execute();
+            $check = $stmtCheck->get_result();
+            if ($check->num_rows > 0) {
+                throw new Exception("La placa ya tiene un ingreso activo.");
+            }
+
+            // Insertar en v_ingresados
+            $stmtInsert = $this->conexion->prepare("
+            INSERT INTO v_ingresados (placa, tipo, modelo, espacio_id, contacto, usuarios_id, fecha_ingreso, estado)
+            VALUES (?, ?, ?, ?, ?, ?, NOW(), 'Activo')
+        ");
+            $stmtInsert->bind_param("sssisi", $placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id);
+            $stmtInsert->execute();
+
+            // Ocupar espacio
+            $stmtOcupar = $this->conexion->prepare("UPDATE espacios SET estado = 'Ocupado' WHERE id = ?");
+            $stmtOcupar->bind_param("i", $espacio_id);
+            $stmtOcupar->execute();
+
+            $this->conexion->commit();
+
+            // Obtener ID del vehículo recién ingresado
+            $vehiculo_id = $this->conexion->insert_id;
+
+            // Contenido del QR (link para retirar)
+            $qrData = "http://localhost/Proyecto_Aula/Controller/retirar_vehiculo.php?id=" . $vehiculo_id;
+
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
+            $qrCode = \Endroid\QrCode\QrCode::create($qrData)
+                ->setSize(200)
+                ->setMargin(10);
+
+            $result = $writer->write($qrCode);
+
+            $qrDir = __DIR__ . '/../Media/QRCodes';
+            if (!file_exists($qrDir)) {
+                mkdir($qrDir, 0777, true);
+            }
+
+            $filename = "admin_qr_" . $vehiculo_id . ".png";
+            $result->saveToFile($qrDir . "/" . $filename);
+
+            // Guardar nombre del QR en la tabla
+            $stmtQR = $this->conexion->prepare("UPDATE v_ingresados SET qr_code = ? WHERE id = ?");
+            $stmtQR->bind_param("si", $filename, $vehiculo_id);
+            $stmtQR->execute();
+
+            return true;
+        } catch (Exception $e) {
+            $this->conexion->rollback();
+            error_log("Error ingreso admin: " . $e->getMessage());
+            return false;
+        }
+    }
 }

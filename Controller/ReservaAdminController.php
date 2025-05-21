@@ -89,6 +89,21 @@ if (isset($_GET['tipo_vehiculo'])) {
     exit;
 }
 
+// Retirar vehículo (acción administrativa)
+if (isset($_GET['action']) && $_GET['action'] === 'retirar' && isset($_GET['id'])) {
+    if ($reserva->retirarVehiculo(
+        $_GET['id'],
+        $_GET['minutos'] ?? 0,
+        $_GET['valor'] ?? 0
+    )) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['error' => 'No se pudo registrar el retiro']);
+    }
+    exit;
+}
+
+
 // --- Procesar formulario de ingreso ---
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Validar datos
@@ -124,15 +139,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Registrar reserva
-    if ($reserva->ingresarVehiculo($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
+    if ($reserva->ingresarVehiculoDesdeAdmin($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
         // Obtener el ID de la reserva recién creada
         $reserva_id = $conexion->insert_id;
 
-        header("Location: ../View/Clientes/Perfil.php?success=reserva_creada&reserva_id=" . $reserva_id);
+        echo "<h3 style='color:green;'>✅ Vehículo ingresado correctamente. Redirigiendo...</h3>";
+        echo "  <script>
+                    setTimeout(() => {
+                        window.location.href = '../View/Admin/Insertar.html';
+                    }, 2000);
+                </script>";
+
+        exit;
     } else {
-        header("Location: ../View/Vehiculos/Formulario.php?error=reserva_error");
-    }
-    exit;
+
+        echo "<h3 style='color:red;'>❌ Ocurrió un error. Redirigiendo...</h3>";
+        echo "  <script>
+                    setTimeout(() => {
+                        window.location.href = '../View/Admin/Insertar.html';
+                    }, 2000);
+                </script>";
+        exit;
+    };
 }
 
 // Redirección por defecto
