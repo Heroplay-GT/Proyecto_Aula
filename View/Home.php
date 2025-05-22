@@ -14,7 +14,6 @@
         <h2 class="logo">ParkinGO</h2>
         <nav class="navigation">
             <a href="#">Inicio</a>
-            <a href="#">Acerca de</a>
             <a href="#">Servicios</a>
             <a href="#" class="contact-link">Contacto</a>
 
