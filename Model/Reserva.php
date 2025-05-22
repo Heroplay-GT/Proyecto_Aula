@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
 class Reserva
 {
     private $conexion;
@@ -8,10 +10,6 @@ class Reserva
         $this->conexion = $conexion;
     }
 
-    public function getConexion()
-    {
-        return $this->conexion;
-    }
 
     // ========== ESPACIOS ==========
     public function obtenerTodosLosEspacios()
@@ -178,19 +176,63 @@ class Reserva
         return $this->conexion->query("SELECT * FROM V_Ingresados WHERE estado = 'Activo' ORDER BY fecha_ingreso DESC");
     }
 
-    public function retirarVehiculo($vehiculo_id, $minutos, $valor)
+    public function retirarVehiculo($vehiculo_id)
     {
         $this->conexion->begin_transaction();
         try {
-            $vehiculo = $this->conexion->query("SELECT * FROM V_Ingresados WHERE id = $vehiculo_id")->fetch_assoc();
+            // 1. Obtener datos del vehículo, incluyendo fecha_ingreso, minutos y espacio
+            $sql = "
+            SELECT vi.*, 
+                   TIMESTAMPDIFF(MINUTE, vi.fecha_ingreso, NOW()) as minutos, 
+                   e.precio_hora 
+            FROM v_ingresados vi 
+            JOIN espacios e ON vi.espacio_id = e.id
+            WHERE vi.id = ?
+        ";
 
-            $stmt = $this->conexion->prepare("INSERT INTO V_Retirados (vehiculo_id, placa, tipo, tiempo_estancia, valor_pagado) 
-                                              VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param("issid", $vehiculo_id, $vehiculo['placa'], $vehiculo['tipo'], $minutos, $valor);
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->bind_param("i", $vehiculo_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $vehiculo = $result->fetch_assoc();
+
+            if (!$vehiculo) {
+                throw new Exception("Vehículo no encontrado");
+            }
+
+            // 2. Calcular tiempo y valor
+            $minutos = $vehiculo['minutos'];
+            $horas = ceil($minutos / 60);
+            $valor = $horas * $vehiculo['precio_hora'];
+
+            // 3. Insertar en V_Retirados
+            $stmt = $this->conexion->prepare("
+            INSERT INTO V_Retirados (vehiculo_id, placa, tipo, tiempo_estancia, valor_pagado)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+            $stmt->bind_param(
+                "issid",
+                $vehiculo_id,
+                $vehiculo['placa'],
+                $vehiculo['tipo'],
+                $minutos,  // Si quieres guardar horas, cambia por $horas
+                $valor
+            );
             $stmt->execute();
 
-            $this->conexion->query("UPDATE V_Ingresados SET estado = 'Finalizado', fecha_salida = NOW() WHERE id = $vehiculo_id");
-            $this->conexion->query("UPDATE espacios SET estado = 'Disponible' WHERE id = {$vehiculo['espacio_id']}");
+            // 4. Marcar como finalizado
+            $this->conexion->query("
+            UPDATE v_ingresados 
+            SET estado = 'Finalizado', fecha_salida = NOW() 
+            WHERE id = $vehiculo_id
+        ");
+
+            // 5. Liberar el espacio
+            $this->conexion->query("
+            UPDATE espacios 
+            SET estado = 'Disponible' 
+            WHERE id = {$vehiculo['espacio_id']}
+        ");
 
             $this->conexion->commit();
             return true;
@@ -271,6 +313,48 @@ class Reserva
         }
     }
 
+    //============== Generar QR desde Admin =================
+    public function generarQRparaAdmin($vehiculo_id)
+    {
+        try {
+            $qrData = "http://localhost/Proyecto_Aula/Controller/retirar_vehiculo.php?id=" . $vehiculo_id;
+            $qrFilename = "admin_qr_" . $vehiculo_id . ".png";
+            $qrDir = __DIR__ . '/../Media/QRCodes';
+            $qrPath = $qrDir . '/' . $qrFilename;
+
+            if (!file_exists($qrDir)) {
+                if (!mkdir($qrDir, 0777, true)) {
+                    throw new Exception("No se pudo crear el directorio QRCodes");
+                }
+            }
+
+            if (!class_exists('Endroid\QrCode\QrCode')) {
+                throw new Exception("Librería QR no disponible");
+            }
+
+            $writer = new \Endroid\QrCode\Writer\PngWriter();
+            $qrCode = \Endroid\QrCode\QrCode::create($qrData)
+                ->setSize(200)
+                ->setMargin(10);
+            $result = $writer->write($qrCode);
+            $result->saveToFile($qrPath);
+
+            // Guardar en base de datos
+            $stmt = $this->conexion->prepare("UPDATE v_ingresados SET qr_code = ? WHERE id = ?");
+            $stmt->bind_param("si", $qrFilename, $vehiculo_id);
+            if (!$stmt->execute()) {
+                throw new Exception("Error guardando QR: " . $stmt->error);
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log("Error generando QR Admin: " . $e->getMessage());
+            echo 'ID correcto: ' . $vehiculo_id;
+            return false;
+        }
+    }
+
+    //============ Ingresar Vehiculo Desde ADmin ============
     public function ingresarVehiculoDesdeAdmin($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)
     {
         $this->conexion->begin_transaction();
@@ -309,6 +393,8 @@ class Reserva
             $stmtInsert->bind_param("sssisi", $placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id);
             $stmtInsert->execute();
 
+            $vehiculo_id = $this->conexion->insert_id;
+
             // Ocupar espacio
             $stmtOcupar = $this->conexion->prepare("UPDATE espacios SET estado = 'Ocupado' WHERE id = ?");
             $stmtOcupar->bind_param("i", $espacio_id);
@@ -316,31 +402,8 @@ class Reserva
 
             $this->conexion->commit();
 
-            // Obtener ID del vehículo recién ingresado
-            $vehiculo_id = $this->conexion->insert_id;
-
             // Contenido del QR (link para retirar)
-            $qrData = "http://localhost/Proyecto_Aula/Controller/retirar_vehiculo.php?id=" . $vehiculo_id;
-
-            $writer = new \Endroid\QrCode\Writer\PngWriter();
-            $qrCode = \Endroid\QrCode\QrCode::create($qrData)
-                ->setSize(200)
-                ->setMargin(10);
-
-            $result = $writer->write($qrCode);
-
-            $qrDir = __DIR__ . '/../Media/QRCodes';
-            if (!file_exists($qrDir)) {
-                mkdir($qrDir, 0777, true);
-            }
-
-            $filename = "admin_qr_" . $vehiculo_id . ".png";
-            $result->saveToFile($qrDir . "/" . $filename);
-
-            // Guardar nombre del QR en la tabla
-            $stmtQR = $this->conexion->prepare("UPDATE v_ingresados SET qr_code = ? WHERE id = ?");
-            $stmtQR->bind_param("si", $filename, $vehiculo_id);
-            $stmtQR->execute();
+            $this->generarQRparaAdmin($vehiculo_id);
 
             return true;
         } catch (Exception $e) {

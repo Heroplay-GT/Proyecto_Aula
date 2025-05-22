@@ -17,8 +17,18 @@ var toggle = document.querySelector('.toggle');
 var nav = document.querySelector('.nav');
 var container = document.querySelector('.container');
 
-toggle.onclick = function() {
+toggle.onclick = function () {
     nav.classList.toggle('active');
     container.classList.toggle('active');
 }
 
+function cargarVista(ruta) {
+    fetch(ruta)
+        .then(res => res.text())
+        .then(html => {
+            document.querySelector(".detalles").innerHTML = html;
+        })
+        .catch(err => {
+            document.querySelector(".detalles").innerHTML = `<p style="color:red;">Error cargando la vista: ${err}</p>`;
+        });
+}

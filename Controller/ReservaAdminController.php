@@ -59,6 +59,34 @@ if (isset($_GET['todos_los_espacios'])) {
     exit;
 }
 
+// Obtener vehículos activos (AJAX)
+if (isset($_GET['vehiculos_activos'])) {
+    header('Content-Type: application/json');
+    $result = $reserva->obtenerVehiculosActivos();
+    $vehiculos = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $vehiculos[] = $row;
+    }
+
+    echo json_encode($vehiculos);
+    exit;
+}
+
+// Retiro
+if (isset($_GET['action']) && $_GET['action'] === 'retirar' && isset($_GET['id'])) {
+    if ($reserva->retirarVehiculo(
+        $_GET['id'],
+
+    )) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['error' => 'No se pudo registrar el retiro']);
+    }
+    exit;
+}
+
+
 // AJAX para obtener espacios disponibles por tipo
 if (isset($_GET['tipo_vehiculo'])) {
     header('Content-Type: application/json');
@@ -88,21 +116,6 @@ if (isset($_GET['tipo_vehiculo'])) {
     }
     exit;
 }
-
-// Retirar vehículo (acción administrativa)
-if (isset($_GET['action']) && $_GET['action'] === 'retirar' && isset($_GET['id'])) {
-    if ($reserva->retirarVehiculo(
-        $_GET['id'],
-        $_GET['minutos'] ?? 0,
-        $_GET['valor'] ?? 0
-    )) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['error' => 'No se pudo registrar el retiro']);
-    }
-    exit;
-}
-
 
 // --- Procesar formulario de ingreso ---
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
