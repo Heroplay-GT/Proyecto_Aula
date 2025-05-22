@@ -21,8 +21,10 @@
 
         <div class="current-config">
             <h3>Configuración Actual</h3>
-            <div id="configActual"></div>
+            <div id="configActual" class="config-cards">
+            </div>
         </div>
+
 
         <form id="configForm">
             <h3>Nueva Configuración</h3>
@@ -42,23 +44,54 @@
                 <input type="number" id="bicicletas" name="bicicletas" min="0" required>
             </div>
 
+            <!-- Precio por hora (Carros) -->
             <div class="form-group">
                 <label for="precioCarro">Precio por hora (Carros):</label>
-                <input type="number" id="precioCarro" name="precioCarro" min="0" step="0.01" required>
+                <div class="input-cop">
+                    <span>$</span>
+                    <input type="number" id="precioCarro" name="precioCarro" min="0" step="100" required>
+                    <span>COP</span>
+                </div>
             </div>
 
+            <!-- Precio por hora (Motos) -->
             <div class="form-group">
                 <label for="precioMoto">Precio por hora (Motos):</label>
-                <input type="number" id="precioMoto" name="precioMoto" min="0" step="0.01" required>
+                <div class="input-cop">
+                    <span>$</span>
+                    <input type="number" id="precioMoto" name="precioMoto" min="0" step="100" required>
+                    <span>COP</span>
+                </div>
             </div>
 
+            <!-- Precio por hora (Bicicletas) -->
             <div class="form-group">
                 <label for="precioBici">Precio por hora (Bicicletas):</label>
-                <input type="number" id="precioBici" name="precioBici" min="0" step="0.01" required>
+                <div class="input-cop">
+                    <span>$</span>
+                    <input type="number" id="precioBici" name="precioBici" min="0" step="100" required>
+                    <span>COP</span>
+                </div>
             </div>
+
 
             <button type="submit" class="btn-save">Guardar Configuración</button>
         </form>
+
+        <div class="form-group">
+            <button class="btn-delete" onclick="mostrarModalEliminar()">Eliminar todos los espacios</button>
+        </div>
+
+        <!-- Modal de confirmación -->
+        <div id="modalEliminar" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="cerrarModal('modalEliminar')">&times;</span>
+                <h3>Eliminar todos los espacios</h3>
+                <p>Esta acción es irreversible. Confirma con la contraseña de administrador:</p>
+                <input type="password" id="adminPass" placeholder="Contraseña admin">
+                <button class="btn btn-cancelar" onclick="confirmarEliminacion()">Eliminar todo</button>
+            </div>
+        </div>
 
         <div class="espacios-list">
             <h3>Espacios Creados</h3>
