@@ -59,6 +59,34 @@ if (isset($_GET['todos_los_espacios'])) {
     exit;
 }
 
+// Obtener vehículos activos (AJAX)
+if (isset($_GET['vehiculos_activos'])) {
+    header('Content-Type: application/json');
+    $result = $reserva->obtenerVehiculosActivos();
+    $vehiculos = [];
+
+    while ($row = $result->fetch_assoc()) {
+        $vehiculos[] = $row;
+    }
+
+    echo json_encode($vehiculos);
+    exit;
+}
+
+// Retiro
+if (isset($_GET['action']) && $_GET['action'] === 'retirar' && isset($_GET['id'])) {
+    if ($reserva->retirarVehiculo(
+        $_GET['id'],
+
+    )) {
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['error' => 'No se pudo registrar el retiro']);
+    }
+    exit;
+}
+
+
 // AJAX para obtener espacios disponibles por tipo
 if (isset($_GET['tipo_vehiculo'])) {
     header('Content-Type: application/json');
@@ -124,15 +152,28 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Registrar reserva
-    if ($reserva->ingresarVehiculo($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
+    if ($reserva->ingresarVehiculoDesdeAdmin($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
         // Obtener el ID de la reserva recién creada
         $reserva_id = $conexion->insert_id;
 
-        header("Location: ../View/Clientes/Perfil.php?success=reserva_creada&reserva_id=" . $reserva_id);
+        echo "<h3 style='color:green;'>✅ Vehículo ingresado correctamente. Redirigiendo...</h3>";
+        echo "  <script>
+                    setTimeout(() => {
+                        window.location.href = '../View/Admin/Insertar.html';
+                    }, 2000);
+                </script>";
+
+        exit;
     } else {
-        header("Location: ../View/Vehiculos/Formulario.php?error=reserva_error");
-    }
-    exit;
+
+        echo "<h3 style='color:red;'>❌ Ocurrió un error. Redirigiendo...</h3>";
+        echo "  <script>
+                    setTimeout(() => {
+                        window.location.href = '../View/Admin/Insertar.html';
+                    }, 2000);
+                </script>";
+        exit;
+    };
 }
 
 // Redirección por defecto

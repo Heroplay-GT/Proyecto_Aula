@@ -17,13 +17,19 @@ if (!$datos || $datos->num_rows === 0) {
 
 $data = $datos->fetch_assoc();
 if ($data['estado'] !== 'Pendiente') {
-    die("Esta reserva ya fue activada o finalizada.");
+    echo "<h3 style='color:orange;'>Esta placa ya ha sido ingresada o cancelada.<br>Redirigiendo...</h3>";
+    echo "<script>
+        setTimeout(() => {
+            window.location.href = '../View/Admin/Insertar.html';
+        }, 2000);
+    </script>";
+    exit;
 }
 
 // Comenzar transacción
 $conexion->begin_transaction();
 try {
-    // 1. Cambiar estado a Activo y poner fecha_ingreso
+    // 1. Cambiar estado de la reserva
     $stmt1 = $conexion->prepare("UPDATE reservas SET estado = 'Activo', fecha_ingreso = NOW() WHERE id = ?");
     $stmt1->bind_param("i", $reserva_id);
     $stmt1->execute();
@@ -45,14 +51,20 @@ try {
     );
     $stmt2->execute();
 
+    // 3. Obtener el ID recién insertado
+    $vehiculo_id = $conexion->insert_id;
+
+    // 4. Generar el QR de retiro
+    $reserva->generarQRparaAdmin($vehiculo_id);
+
     $conexion->commit();
-    echo "Reserva activada correctamente y vehículo ingresado.";
+
+    echo "<h3 style='color:green;'>✅ Reserva activada y QR de retiro generado.</h3>";
 } catch (Exception $e) {
     $conexion->rollback();
-    echo "Error al activar la reserva: " . $e->getMessage();
+    echo "<h3 style='color:red;'>❌ Error al activar la reserva. Intenta de nuevo.</h3>";
 }
 
-echo "<h3 style='color:green;'>Reserva activada correctamente. Redirigiendo...</h3>";
 echo "<script>
     setTimeout(() => {
         window.location.href = '../View/Admin/Insertar.html';
