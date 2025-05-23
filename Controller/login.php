@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     if (password_verify($password, $fila['password'])) {
         $_SESSION['username'] = $fila['username'];
-        $_SESSION['id'] = $fila['id']; // <- AGREGA ESTA LÍNEA
+        $_SESSION['id'] = $fila['id'];
     
         // Redirigir según el rol
         if ($fila['username'] === 'admin') {

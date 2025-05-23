@@ -71,15 +71,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Cerrar modal de retiro
-    function cerrarModal() {
+    window.cerrarModal = function () {
         modalRetiro.style.display = 'none';
-    }
+    };
 
-    // Cerrar modal de recibo
-    function cerrarRecibo() {
+    window.cerrarRecibo = function () {
         reciboModal.style.display = 'none';
-        cargarVehiculos(); // Recargar la tabla después de retirar
-    }
+        cargarVehiculos(); // esta sí funciona porque está dentro del mismo scope
+    };
 
     // Confirmar retiro
     confirmarRetiro.addEventListener('click', function () {
@@ -129,4 +128,39 @@ document.addEventListener('DOMContentLoaded', function () {
             cerrarRecibo();
         }
     });
+
 });
+
+function imprimirRecibo() {
+    const contenido = document.getElementById('reciboContenido').innerHTML;
+    const ventana = window.open('', '_blank');
+    ventana.document.write(`
+        <html>
+            <head>
+                <title>Recibo de Retiro</title>
+                <style>
+                    body {
+                        font-family: 'Poppins', sans-serif;
+                        padding: 30px;
+                        color: #333;
+                    }
+                    h3 {
+                        text-align: center;
+                        margin-bottom: 20px;
+                    }
+                    .recibo-item {
+                        margin-bottom: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                <h3>Recibo de Retiro</h3>
+                ${contenido}
+            </body>
+        </html>
+    `);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+    ventana.close();
+}

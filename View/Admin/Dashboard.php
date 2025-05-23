@@ -20,7 +20,7 @@
           </a>
         </li>
         <li>
-          <a href="#">
+          <a href="clientes.php">
             <span class="icono"><ion-icon name="person-outline"></ion-icon></span>
             <span class="titulo">Clientes</span>
           </a>

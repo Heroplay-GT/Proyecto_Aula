@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="../CSS/retirar.css" />
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
-    
+
 </head>
 
 <body>
@@ -62,6 +62,7 @@
             <button class="modal-close" onclick="cerrarRecibo()" title="Cerrar">&times;</button>
             <h3>Recibo de Retiro</h3>
             <div id="reciboContenido"></div>
+            <button class="btn" onclick="imprimirRecibo()">Imprimir</button>
             <button class="btn" onclick="cerrarRecibo()">Cerrar</button>
         </div>
     </div>

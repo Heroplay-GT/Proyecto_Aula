@@ -138,14 +138,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         echo "<h3 style='color:green;'>✅ Vehículo ingresado correctamente. Redirigiendo...</h3>";
         echo "<script>
             setTimeout(() => {
-                window.location.href = '../View/Admin/Insertar.html';
+                window.location.href = '../View/Admin/Insertar.php';
             }, 2000);
         </script>";
     } else {
         echo "<h3 style='color:red;'>❌ Ocurrió un error al registrar el vehículo. Redirigiendo...</h3>";
         echo "<script>
             setTimeout(() => {
-                window.location.href = '../View/Admin/Insertar.html';
+                window.location.href = '../View/Admin/Insertar.php';
             }, 2000);
         </script>";
     }

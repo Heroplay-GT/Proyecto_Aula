@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
         contenidoEspacios.innerHTML = '<p class="loading">Cargando espacios...</p>';
 
         try {
-            const url = `${baseUrl}/Controller/ReservaController.php?todos_los_espacios=1${tipo !== 'all' ? `&tipo=${tipo}` : ''}`;
+            const url = `${baseUrl}/Controller/ReservaAdminController.php?todos_los_espacios=1${tipo !== 'all' ? `&tipo=${tipo}` : ''}`;
             const response = await fetch(url);
 
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetSelectEspacio('Cargando espacios...');
 
         try {
-            const response = await fetch(`${baseUrl}/Controller/ReservaController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`);
+            const response = await fetch(`${baseUrl}/Controller/ReservaAdminController.php?tipo_vehiculo=${encodeURIComponent(tipo)}`);
             const data = await response.json();
 
             if (data.error) throw new Error(data.error);
