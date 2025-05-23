@@ -1,78 +1,132 @@
-let vehiculoIdSeleccionado = null;
+document.addEventListener('DOMContentLoaded', function () {
+    const buscarPlaca = document.getElementById('buscarPlaca');
+    const tablaVehiculos = document.getElementById('tablaVehiculos').getElementsByTagName('tbody')[0];
+    const modalRetiro = document.getElementById('modalRetiro');
+    const reciboModal = document.getElementById('reciboModal');
+    const infoVehiculo = document.getElementById('infoVehiculo');
+    const reciboContenido = document.getElementById('reciboContenido');
+    const confirmarRetiro = document.getElementById('confirmarRetiro');
 
-document.addEventListener("DOMContentLoaded", () => {
-    fetch("../../Controller/ReservaAdminController.php?vehiculos_activos=1")
-        .then(res => res.json())
-        .then(data => {
-            const tbody = document.querySelector("#tablaVehiculos tbody");
-            data.forEach(v => {
-                const fila = document.createElement("tr");
-                fila.innerHTML = `
-          <td>${v.placa}</td>
-          <td>${v.tipo}</td>
-          <td>${v.modelo}</td>
-          <td>${v.espacio_id}</td>
-          <td>${v.fecha_ingreso}</td>
-          <td><button onclick="abrirModal(${v.id}, '${v.placa}')">Retirar</button></td>
-        `;
-                tbody.appendChild(fila);
-            });
-        });
-});
+    let vehiculoActual = null;
 
-function abrirModal(id, placa) {
-    vehiculoIdSeleccionado = id;
-    document.getElementById("infoVehiculo").textContent = `Placa: ${placa}`;
-    document.getElementById("modalRetiro").style.display = "block";
-}
+    // Cargar vehículos al inicio
+    cargarVehiculos();
 
-function cerrarModal() {
-    document.getElementById("modalRetiro").style.display = "none";
-    vehiculoIdSeleccionado = null;
-}
+    // Buscar vehículos al escribir en el campo de búsqueda
+    buscarPlaca.addEventListener('input', function () {
+        cargarVehiculos(this.value);
+    });
 
-document.getElementById("minutos").addEventListener("input", () => {
-    const tarifaMinuto = 100; // Cambiar según tu lógica
-    const minutos = parseInt(document.getElementById("minutos").value) || 0;
-    document.getElementById("valor").value = minutos * tarifaMinuto;
-});
+    // Función para cargar vehículos
+    function cargarVehiculos(placa = '') {
+        fetch(`../../Controller/buscar_vehiculo.php?placa=${encodeURIComponent(placa)}`)
+            .then(response => response.json())
+            .then(data => {
+                tablaVehiculos.innerHTML = '';
+                data.forEach(vehiculo => {
+                    const row = tablaVehiculos.insertRow();
+                    row.innerHTML = `
+                        <td>${vehiculo.placa}</td>
+                        <td>${vehiculo.tipo}</td>
+                        <td>${vehiculo.modelo || 'N/A'}</td>
+                        <td>${vehiculo.espacio}</td>
+                        <td>${vehiculo.fecha_ingreso}</td>
+                        <td><button class="btn-retirar" data-id="${vehiculo.id}">Retirar</button></td>
+                    `;
+                });
 
-document.getElementById("confirmarRetiro").addEventListener("click", () => {
-    const minutos = parseInt(document.getElementById("minutos").value);
-    const valor = parseInt(document.getElementById("valor").value);
-
-    if (!vehiculoIdSeleccionado || !minutos || !valor) {
-        alert("Completa los campos.");
-        return;
+                // Agregar eventos a los botones de retirar
+                document.querySelectorAll('.btn-retirar').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const id = this.getAttribute('data-id');
+                        mostrarModalRetiro(id);
+                    });
+                });
+            })
+            .catch(error => console.error('Error:', error));
     }
 
-    fetch(`../../Controller/ReservaAdminController.php?action=retirar&id=${vehiculoIdSeleccionado}&minutos=${minutos}&valor=${valor}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                mostrarRecibo(data.recibo);
-            } else {
-                alert("Error al retirar: " + (data.error || ""));
-            }
-        });
+    // Mostrar modal de confirmación de retiro
+    function mostrarModalRetiro(id) {
+        const vehiculo = Array.from(tablaVehiculos.querySelectorAll('tr'))
+            .map(row => ({
+                id: row.querySelector('.btn-retirar').getAttribute('data-id'),
+                placa: row.cells[0].textContent,
+                tipo: row.cells[1].textContent,
+                modelo: row.cells[2].textContent,
+                espacio: row.cells[3].textContent,
+                fecha_ingreso: row.cells[4].textContent
+            }))
+            .find(v => v.id === id);
 
+        vehiculoActual = vehiculo;
+        infoVehiculo.innerHTML = `
+            <strong>Placa:</strong> ${vehiculo.placa}<br>
+            <strong>Tipo:</strong> ${vehiculo.tipo}<br>
+            <strong>Modelo:</strong> ${vehiculo.modelo}<br>
+            <strong>Espacio:</strong> ${vehiculo.espacio}<br>
+            <strong>Fecha Ingreso:</strong> ${vehiculo.fecha_ingreso}
+        `;
+        modalRetiro.style.display = 'block';
+    }
+
+    // Cerrar modal de retiro
+    function cerrarModal() {
+        modalRetiro.style.display = 'none';
+    }
+
+    // Cerrar modal de recibo
+    function cerrarRecibo() {
+        reciboModal.style.display = 'none';
+        cargarVehiculos(); // Recargar la tabla después de retirar
+    }
+
+    // Confirmar retiro
+    confirmarRetiro.addEventListener('click', function () {
+        if (!vehiculoActual) return;
+
+        fetch('../../Controller/retirar_vehiculo.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `id=${vehiculoActual.id}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    cerrarModal();
+                    mostrarRecibo(data);
+                } else {
+                    alert('Error al retirar vehículo: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    // Mostrar recibo
+    function mostrarRecibo(data) {
+        reciboContenido.innerHTML = `
+            <p><strong>Placa:</strong> ${data.placa}</p>
+            <p><strong>Tipo:</strong> ${data.tipo}</p>
+            <p><strong>Modelo:</strong> ${data.modelo}</p>
+            <p><strong>Espacio:</strong> ${data.espacio}</p>
+            <p><strong>Fecha Ingreso:</strong> ${data.fecha_ingreso}</p>
+            <p><strong>Fecha Salida:</strong> ${data.fecha_salida}</p>
+            <p><strong>Tiempo Estancia:</strong> ${data.horas} horas</p>
+            <p><strong>Precio por hora:</strong> $${data.precio_hora}</p>
+            <p><strong>Valor a pagar:</strong> $${data.valor_pagado}</p>
+        `;
+        reciboModal.style.display = 'block';
+    }
+
+    // Cerrar modales al hacer clic fuera del contenido
+    window.addEventListener('click', function (event) {
+        if (event.target === modalRetiro) {
+            cerrarModal();
+        }
+        if (event.target === reciboModal) {
+            cerrarRecibo();
+        }
+    });
 });
-
-function mostrarRecibo(info) {
-    document.getElementById("reciboContenido").innerHTML = `
-    <p><strong>Placa:</strong> ${info.placa}</p>
-    <p><strong>Tipo:</strong> ${info.tipo}</p>
-    <p><strong>Ingreso:</strong> ${info.fecha_ingreso}</p>
-    <p><strong>Salida:</strong> ${info.fecha_salida}</p>
-    <p><strong>Tiempo total:</strong> ${info.minutos} min (${info.horas} horas)</p>
-    <p><strong>Precio/hora:</strong> $${info.precio_hora}</p>
-    <p><strong>Valor pagado:</strong> $${info.valor}</p>
-  `;
-    document.getElementById("reciboModal").style.display = "block";
-}
-
-function cerrarRecibo() {
-    document.getElementById("reciboModal").style.display = "none";
-    location.reload();
-}
-

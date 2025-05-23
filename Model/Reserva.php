@@ -176,73 +176,6 @@ class Reserva
         return $this->conexion->query("SELECT * FROM V_Ingresados WHERE estado = 'Activo' ORDER BY fecha_ingreso DESC");
     }
 
-    public function retirarVehiculo($vehiculo_id)
-    {
-        $this->conexion->begin_transaction();
-        try {
-            // 1. Obtener datos del vehículo, incluyendo fecha_ingreso, minutos y espacio
-            $sql = "
-            SELECT vi.*, 
-                   TIMESTAMPDIFF(MINUTE, vi.fecha_ingreso, NOW()) as minutos, 
-                   e.precio_hora 
-            FROM v_ingresados vi 
-            JOIN espacios e ON vi.espacio_id = e.id
-            WHERE vi.id = ?
-        ";
-
-            $stmt = $this->conexion->prepare($sql);
-            $stmt->bind_param("i", $vehiculo_id);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $vehiculo = $result->fetch_assoc();
-
-            if (!$vehiculo) {
-                throw new Exception("Vehículo no encontrado");
-            }
-
-            // 2. Calcular tiempo y valor
-            $minutos = $vehiculo['minutos'];
-            $horas = ceil($minutos / 60);
-            $valor = $horas * $vehiculo['precio_hora'];
-
-            // 3. Insertar en V_Retirados
-            $stmt = $this->conexion->prepare("
-            INSERT INTO V_Retirados (vehiculo_id, placa, tipo, tiempo_estancia, valor_pagado)
-            VALUES (?, ?, ?, ?, ?)
-        ");
-            $stmt->bind_param(
-                "issid",
-                $vehiculo_id,
-                $vehiculo['placa'],
-                $vehiculo['tipo'],
-                $minutos,  // Si quieres guardar horas, cambia por $horas
-                $valor
-            );
-            $stmt->execute();
-
-            // 4. Marcar como finalizado
-            $this->conexion->query("
-            UPDATE v_ingresados 
-            SET estado = 'Finalizado', fecha_salida = NOW() 
-            WHERE id = $vehiculo_id
-        ");
-
-            // 5. Liberar el espacio
-            $this->conexion->query("
-            UPDATE espacios 
-            SET estado = 'Disponible' 
-            WHERE id = {$vehiculo['espacio_id']}
-        ");
-
-            $this->conexion->commit();
-            return true;
-        } catch (Exception $e) {
-            $this->conexion->rollback();
-            error_log("Error retirando vehículo: " . $e->getMessage());
-            return false;
-        }
-    }
-
     // ========== QR GENERATOR ==========
     public function generarCodigoQR($reserva_id)
     {
@@ -411,5 +344,119 @@ class Reserva
             error_log("Error ingreso admin: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function retirarVehiculoDesdeIngresados($placa)
+    {
+        $this->conexion->begin_transaction();
+        try {
+            // Obtener los datos actuales del vehículo ingresado
+            $stmt = $this->conexion->prepare("SELECT * FROM v_ingresados WHERE placa = ? AND estado = 'Activo'");
+            $stmt->bind_param("s", $placa);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 0) {
+                throw new Exception("Vehículo no encontrado o ya retirado.");
+            }
+
+            $vehiculo = $result->fetch_assoc();
+
+            // Calcular minutos y valor
+            $fechaIngreso = new DateTime($vehiculo['fecha_ingreso']);
+            $fechaSalida = new DateTime(); // NOW
+            $intervalo = $fechaIngreso->diff($fechaSalida);
+            $minutos = ($intervalo->days * 24 * 60) + ($intervalo->h * 60) + $intervalo->i;
+            $horasDecimal = round($minutos / 60, 2);
+            $valor = ceil($horasDecimal * $vehiculo['precio_hora']); // Puedes ajustar redondeo
+
+            // Insertar en v_retirados
+            $stmt = $this->conexion->prepare("INSERT INTO v_retirados (placa, tipo, modelo, espacio_id, fecha_ingreso, fecha_salida, minutos, valor, precio_hora)
+                                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param(
+                "sssissiid",
+                $vehiculo['placa'],
+                $vehiculo['tipo'],
+                $vehiculo['modelo'],
+                $vehiculo['espacio_id'],
+                $vehiculo['fecha_ingreso'],
+                $fechaSalida->format("Y-m-d H:i:s"),
+                $minutos,
+                $valor,
+                $vehiculo['precio_hora']
+            );
+            $stmt->execute();
+
+            // Actualizar estado a Finalizado en v_ingresados
+            $stmt = $this->conexion->prepare("UPDATE v_ingresados SET estado = 'Finalizado' WHERE placa = ?");
+            $stmt->bind_param("s", $placa);
+            $stmt->execute();
+
+            // Liberar espacio
+            $stmt = $this->conexion->prepare("UPDATE espacios SET estado = 'Disponible' WHERE id = ?");
+            $stmt->bind_param("i", $vehiculo['espacio_id']);
+            $stmt->execute();
+
+            $this->conexion->commit();
+
+            return [
+                'placa' => $vehiculo['placa'],
+                'tipo' => $vehiculo['tipo'],
+                'modelo' => $vehiculo['modelo'],
+                'fecha_ingreso' => $vehiculo['fecha_ingreso'],
+                'fecha_salida' => $fechaSalida->format("Y-m-d H:i:s"),
+                'minutos' => $minutos,
+                'horas' => $horasDecimal,
+                'precio_hora' => $vehiculo['precio_hora'],
+                'valor' => $valor
+            ];
+        } catch (Exception $e) {
+            $this->conexion->rollback();
+            error_log("Error al retirar vehículo: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function buscarVehiculosPorPlaca($placa)
+    {
+        $placaBusqueda = '%' . $placa . '%';
+
+        $sql = "SELECT id, placa, tipo, modelo, espacio_id, fecha_ingreso
+            FROM v_ingresados
+            WHERE placa LIKE ? AND estado = 'Activo'";
+
+        if ($stmt = $this->conexion->prepare($sql)) {
+            $stmt->bind_param("s", $placaBusqueda);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $vehiculos = [];
+            while ($row = $result->fetch_assoc()) {
+                $vehiculos[] = $row;
+            }
+
+            $stmt->close();
+            return $vehiculos;
+        } else {
+            return false;
+        }
+    }
+
+    public function obtenerVehiculoPorId($id)
+    {
+        $sql = "SELECT * FROM v_ingresados WHERE id = ?";
+        $stmt = $this->conexion->prepare($sql);
+        if (!$stmt) {
+            return false;
+        }
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $resultado = $stmt->get_result();
+        if ($resultado->num_rows === 0) {
+            return false;
+        }
+        $vehiculo = $resultado->fetch_assoc();
+        $stmt->close();
+        return $vehiculo;
     }
 }

@@ -7,7 +7,6 @@ ob_start();
         <h2 class="logo">Parking Go</h2>
         <nav class="navigation">
             <a href="configuracion.php">Configuración</a>
-            <a href="../../Controller/logout.php">Salir</a>
         </nav>
     </header>
 

@@ -1,0 +1,122 @@
+body {
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+    background-image: url('../../Media/Ilustracion.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.reporte-container {
+    padding: 30px;
+    background-color: #ffffffd9;
+    border-radius: 10px;
+    margin: 30px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.reporte-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.reporte-header select {
+    padding: 8px 12px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.reporte-header button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: #2c3e50;
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.reporte-header button:hover {
+    background-color: #1a252f;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th,
+td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.total-recaudado {
+    margin-top: 20px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    .admin-container,
+    .admin-container * {
+        visibility: visible;
+    }
+
+    .admin-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+
+    .btn-imprimir,
+    .filtro-mes {
+        display: none !important;
+    }
+}
+
+.header-actions {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.btn-regresar {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 15px;
+    background-color: #2c3e50;
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-regresar:hover {
+    background-color: #1a252f;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-regresar ion-icon {
+    margin-right: 8px;
+    font-size: 18px;
+}

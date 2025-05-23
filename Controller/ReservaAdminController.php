@@ -2,7 +2,8 @@
 session_start();
 require_once '../conexion.php';
 require_once '../Model/Reserva.php';
-require_once '../vendor/autoload.php'; // para usar Endroid\QrCode
+require_once '../vendor/autoload.php';
+
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 
@@ -29,7 +30,7 @@ $usuario_id = $usuario['id'];
 
 $reserva = new Reserva($conexion);
 
-// AJAX para obtener todos los espacios (modal)
+// Obtener todos los espacios (AJAX)
 if (isset($_GET['todos_los_espacios'])) {
     header('Content-Type: application/json');
 
@@ -73,21 +74,7 @@ if (isset($_GET['vehiculos_activos'])) {
     exit;
 }
 
-// Retiro
-if (isset($_GET['action']) && $_GET['action'] === 'retirar' && isset($_GET['id'])) {
-    if ($reserva->retirarVehiculo(
-        $_GET['id'],
-
-    )) {
-        echo json_encode(['success' => true]);
-    } else {
-        echo json_encode(['error' => 'No se pudo registrar el retiro']);
-    }
-    exit;
-}
-
-
-// AJAX para obtener espacios disponibles por tipo
+// Obtener espacios disponibles por tipo (AJAX)
 if (isset($_GET['tipo_vehiculo'])) {
     header('Content-Type: application/json');
 
@@ -117,64 +104,52 @@ if (isset($_GET['tipo_vehiculo'])) {
     exit;
 }
 
-// --- Procesar formulario de ingreso ---
+// Procesar formulario de ingreso (POST)
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    // Validar datos
     $placa = trim($_POST['placa'] ?? '');
     $tipo = trim($_POST['tipo_vehiculo'] ?? '');
     $modelo = trim($_POST['modelo'] ?? '');
     $espacio_id = (int)($_POST['espacio'] ?? 0);
     $contacto = trim($_POST['contacto'] ?? '');
 
-    // Validaciones básicas
     $errores = [];
 
-    if ($tipo !== 'Bicicleta' && empty($placa)) {
-        $errores[] = "placa";
-    }
-
+    if ($tipo !== 'Bicicleta' && empty($placa)) $errores[] = "placa";
     if (empty($tipo)) $errores[] = "tipo_vehiculo";
     if ($espacio_id <= 0) $errores[] = "espacio";
     if (empty($contacto)) $errores[] = "contacto";
 
     if (!empty($errores)) {
-        echo "<h3 style='color:green;'>Upps, ha ocurrido un error. <br> Redirigiendo...</h3>";
+        echo "<h3 style='color:red;'>❌ Faltan campos obligatorios. Redirigiendo...</h3>";
         echo "<script>
             setTimeout(() => {
                 window.location.href = 'Formulario.php';
             }, 2000);
         </script>";
+        exit;
     }
 
-    // Procesar bicicletas sin placa
+    // Asignar placa a bicicletas automáticamente
     if ($tipo === 'Bicicleta' && empty($placa)) {
         $placa = 'BIC-' . strtoupper(substr(md5(uniqid()), 0, 6));
     }
 
-    // Registrar reserva
     if ($reserva->ingresarVehiculoDesdeAdmin($placa, $tipo, $modelo, $espacio_id, $contacto, $usuario_id)) {
-        // Obtener el ID de la reserva recién creada
-        $reserva_id = $conexion->insert_id;
-
         echo "<h3 style='color:green;'>✅ Vehículo ingresado correctamente. Redirigiendo...</h3>";
-        echo "  <script>
-                    setTimeout(() => {
-                        window.location.href = '../View/Admin/Insertar.html';
-                    }, 2000);
-                </script>";
-
-        exit;
+        echo "<script>
+            setTimeout(() => {
+                window.location.href = '../View/Admin/Insertar.html';
+            }, 2000);
+        </script>";
     } else {
-
-        echo "<h3 style='color:red;'>❌ Ocurrió un error. Redirigiendo...</h3>";
-        echo "  <script>
-                    setTimeout(() => {
-                        window.location.href = '../View/Admin/Insertar.html';
-                    }, 2000);
-                </script>";
-        exit;
-    };
+        echo "<h3 style='color:red;'>❌ Ocurrió un error al registrar el vehículo. Redirigiendo...</h3>";
+        echo "<script>
+            setTimeout(() => {
+                window.location.href = '../View/Admin/Insertar.html';
+            }, 2000);
+        </script>";
+    }
+    exit;
 }
-
 // Redirección por defecto
 header("Location: ../View/Vehiculos/Formulario.php");
