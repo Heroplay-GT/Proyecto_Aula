@@ -14,7 +14,7 @@
 <body>
 
   <div class="header-actions">
-    <a href="Dashboard.html" class="btn-regresar">
+    <a href="Dashboard.php" class="btn-regresar">
       <ion-icon name="chevron-back-circle-outline"></ion-icon>
       <span>Volver al inicio</span>
     </a>

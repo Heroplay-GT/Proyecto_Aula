@@ -26,13 +26,13 @@
           </a>
         </li>
         <li>
-          <a href="reportes.html">
+          <a href="reportes.php">
             <span class="icono"><ion-icon name="document-text-outline"></ion-icon></span>
             <span class="titulo">Reporte</span>
           </a>
         </li>
         <li>
-          <a href="../Admin/Insertar.html">
+          <a href="../Admin/Insertar.php">
             <span class="icono"><ion-icon name="add"></ion-icon></span>
             <span class="titulo">Ingreso</span>
           </a>
@@ -44,7 +44,7 @@
           </a>
         </li>
         <li>
-          <a href="Crear_espacios.html">
+          <a href="Crear_espacios.php">
             <span class="icono"><ion-icon name="settings-outline"></ion-icon></span>
             <span class="titulo">Configuración Espacios</span>
           </a>

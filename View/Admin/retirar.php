@@ -13,7 +13,7 @@
 <body>
     <div class="retirar-container">
         <div class="header-actions">
-            <a href="Dashboard.html" class="btn-regresar">
+            <a href="Dashboard.php" class="btn-regresar">
                 <ion-icon name="arrow-back-outline"></ion-icon>
                 Regresar
             </a>
